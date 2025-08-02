@@ -1,0 +1,4035 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetAI - Veterinary Assistant Dashboard</title>
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">-->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!--<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&display=swap" rel="stylesheet">
+    rel="stylesheet">-->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    /* Reset and Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Space Grotesk', sans-serif;
+        background-color: #F9F9F9;
+        color: #333333;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 260px;
+        background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        border-radius: 0 15px 15px 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-header {
+        padding: 2rem 1.5rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+        font-size: 1.6rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    .logo i {
+        font-size: 1.8rem;
+        color: #4CAF50;
+        filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.3));
+    }
+
+    /* Navigation Styles */
+    .nav-links {
+        list-style: none;
+        padding: 1.5rem 0;
+    }
+
+    .nav-item {
+        margin-bottom: 0.3rem;
+        padding: 0 1rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 0.875rem 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(102, 187, 106, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.9);
+        transform: translateX(4px);
+    }
+
+    .nav-link:hover::before {
+        opacity: 1;
+    }
+
+    .nav-item.active .nav-link {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        transform: translateX(0);
+    }
+
+    .nav-item.active .nav-link::before {
+        opacity: 0;
+    }
+
+    .nav-link i {
+        font-size: 1.1rem;
+        width: 18px;
+        text-align: center;
+        z-index: 1;
+        position: relative;
+    }
+
+    /* Main Content Area */
+    .main-content {
+        margin-left: 260px;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .content-wrapper {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Content Sections */
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header-doctor{
+        margin-left: 2rem;
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+    .page-header-predict{
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+    }
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 300;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .dashboard-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(76, 175, 80, 0.1);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: #4CAF50;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .dashboard-card h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.75rem;
+    }
+
+    .dashboard-card p {
+        color: #666;
+        font-weight: 300;
+        line-height: 1.5;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(76, 175, 80, 0.1);
+        overflow: hidden;
+    }
+
+    .card-content {
+        padding: 2.5rem;
+    }
+
+    .feature-card h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card p {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 300;
+        line-height: 1.6;
+    }
+
+    /* Mobile Menu Toggle */
+    .mobile-menu-toggle {
+        display: none;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        color: white;
+        border-radius: 12px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-menu-toggle:hover {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        transform: scale(1.05);
+    }
+
+    .mobile-menu-toggle i {
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-left: 0;
+            padding-top: 4rem;
+        }
+        
+        .content-wrapper {
+            padding: 1rem;
+        }
+        
+        .mobile-menu-toggle {
+            display: flex;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .dashboard-card {
+            padding: 1.5rem;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .feature-card h2 {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .content-wrapper {
+            padding: 0.5rem;
+        }
+        
+        .page-header {
+            margin-bottom: 1rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .dashboard-card {
+            padding: 1rem;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 1rem;
+        }
+        
+        .card-icon i {
+            font-size: 1.25rem;
+        }
+        
+        .dashboard-card h3 {
+            font-size: 1.1rem;
+        }
+        
+        .card-content {
+            padding: 1rem;
+        }
+    }
+
+    /* Smooth Scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Focus States for Accessibility */
+    .nav-link:focus,
+    .mobile-menu-toggle:focus {
+        outline: 2px solid #66BB6A;
+        outline-offset: 2px;
+    }
+
+    /* Loading Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .content-section.active {
+        animation: fadeIn 0.5s ease;
+    }
+
+    /* Custom Scrollbar */
+    .sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 2px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #4CAF50, #66BB6A);
+        border-radius: 2px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #66BB6A, #4CAF50);
+    }
+
+    /* Additional Sidebar Enhancements */
+    .nav-link span {
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+    }
+
+    .nav-item.active .nav-link i {
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Subtle animation for active state */
+    @keyframes activeGlow {
+        0% { box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); }
+        50% { box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4); }
+        100% { box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); }
+    }
+
+    .nav-item.active .nav-link {
+        animation: activeGlow 2s ease-in-out infinite;
+    }
+
+
+    /* Disease Section Styles */
+    .disease-section {
+        margin-top: 4rem;
+        padding: 3rem 0;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .disease-section h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+
+    .disease-section > p {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Carousel Styles */
+    .disease-carousel {
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        border-radius: 15px;
+    }
+
+    .carousel-container {
+        display: flex;
+
+    }
+
+    @keyframes scroll {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(-800px); } /* Move 2 cards width */
+        100% { transform: translateX(0); }
+    }
+
+    .carousel-container:hover {
+        animation-play-state: paused;
+    }
+
+    /* Disease Card Styles */
+    .disease-carousel {
+        max-width: 100%;
+        margin: 0 auto;
+        border-radius: 15px;
+        cursor: grab;
+    }
+
+    .disease-carousel:active {
+        cursor: grabbing;
+    }
+
+    .carousel-container {
+        display: flex;
+        animation: infiniteScroll 30s linear infinite;
+        width: calc(400px * 9); /* 6 original + 3 duplicates */
+        transition: transform 0.3s ease;
+    }
+
+    @keyframes infiniteScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-400px * 6)); } /* Move by 6 cards width */
+    }
+
+    .carousel-container:hover {
+        animation-play-state: paused;
+    }
+
+    .disease-card {
+        flex: 0 0 350px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        margin: 0 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid transparent;
+        user-select: none;
+    }
+
+    .disease-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        border-color: #4CAF50;
+    }
+
+    .disease-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .disease-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0;
+        pointer-events: none;
+    }
+
+    .disease-type {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .disease-type.viral {
+        background: linear-gradient(135deg, #ff1717, #ff2d2d);
+        color: white;
+    }
+
+    .disease-type.bacterial {
+        background: linear-gradient(135deg, #00f4e4, #00a399);
+        color: white;
+    }
+
+    .disease-info {
+        padding: 2rem;
+        text-align: left;
+    }
+
+    .disease-info h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+
+    .disease-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .disease-details span {
+        font-size: 0.9rem;
+        color: #666;
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .pathogen {
+        background: #e3f2fd !important;
+        color: #1976d2 !important;
+    }
+
+    .affected {
+        background: #f3e5f5 !important;
+        color: #7b1fa2 !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .carousel-container {
+            width: calc(300px * 9);
+            animation: infiniteScrollMobile 25s linear infinite;
+        }
+        
+        @keyframes infiniteScrollMobile {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-300px * 6)); }
+        }
+        
+        .disease-card {
+            flex: 0 0 300px;
+            margin: 0 10px;
+        }
+        
+        .disease-image {
+            height: 150px;
+        }
+        
+        .disease-info {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .carousel-container {
+            width: calc(250px * 9);
+        }
+        
+        @keyframes infiniteScrollMobile {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-250px * 6)); }
+        }
+        
+        .disease-card {
+            flex: 0 0 250px;
+            margin: 0 8px;
+        }
+        
+        .disease-info h3 {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* AI Assistant Section Styles */
+            .lang-select {
+                width: 24%;
+                padding: 0.5rem 1rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-family: 'Space Grotesk', sans-serif;
+                background: #fafafa;
+                transition: all 0.3s ease;
+                outline: none;
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 1rem center;
+                background-repeat: no-repeat;
+                background-size: 1rem;
+            }
+            #ai-assistant {
+                
+                background: #f8f9fa;
+                min-height: 100vh;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .ai-chat-container {
+                margin: 0 auto;
+            }
+
+            
+            .chat-body {
+                min-height: 400px;
+            }
+
+            .input-container {
+                position: relative;
+                margin-bottom: 2rem;
+            }
+
+            .chat-input {
+                width: 89%;
+                padding: 1rem 5rem 1rem 1.5rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 50px;
+                font-size: 1rem;
+                font-family: 'Space Grotesk', sans-serif;
+                transition: all 0.3s ease;
+                background: #fafafa;
+                outline: none;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .chat-input:focus {
+                border-color: #4CAF50;
+                background: white;
+                box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
+            }
+
+            .chat-input::placeholder {
+                color: #999;
+                font-weight: 300;
+            }
+
+            .ask-button {
+                position: absolute;
+                right: 0.01rem;
+                top: 50%;
+                transform: translateY(-50%);
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                padding: 1.1rem 1.8rem;
+                font-size: 0.95rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .ask-button:hover {
+                background: linear-gradient(135deg, #45a049, #5cb85c);
+                transform: translateY(-50%) scale(1.05);
+                box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4);
+            }
+
+            .ask-button:active {
+                transform: translateY(-50%) scale(0.98);
+            }
+
+            .ask-button i {
+                font-size: 0.9rem;
+            }
+
+            .response-container {
+                background: #ffffff;
+                border-radius: 12px;
+                padding: 1.5rem;
+                border-left: 4px solid #4CAF50;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                display: none;
+                margin-top: 1rem;
+                position: relative;
+            }
+
+            .response-container.active {
+                display: block;
+                animation: slideIn 0.5s ease-out;
+            }
+
+            .ai-response {
+                font-size: 1rem;
+                line-height: 1.8;
+                color: #333;
+                font-weight: 400;
+                font-family: inherit;
+            }
+
+            /* Language-specific styles */
+            .ai-response.lang-en {
+                font-family: 'Noto Sans', 'Segoe UI', sans-serif;
+                font-size: 1rem;
+                line-height: 1.7;
+            }
+
+            .ai-response.lang-ta {
+                font-family: 'Noto Sans Tamil', 'Segoe UI', sans-serif;
+                font-size: 1rem;
+                line-height: 1.7;
+            }
+
+            .ai-response.lang-te {
+                font-family: 'Noto Sans Telugu', 'Segoe UI', sans-serif;
+                font-size: 1;
+                line-height: 1.7;
+            }
+
+            /* Enhanced formatting */
+            .ai-response strong {
+                color: #e74c3c;
+                font-weight: 700;
+                background: rgba(231, 76, 60, 0.1);
+                padding: 0.1rem 0.2rem;
+                border-radius: 3px;
+            }
+
+            .ai-response h1, .ai-response h2, .ai-response h3, .ai-response h4 {
+                color: #2c3e50;
+                margin: 1.5rem 0 1rem 0;
+                font-weight: 600;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 0.5rem;
+            }
+
+            .ai-response h3 {
+                font-size: 1.4rem;
+            }
+
+            .ai-response.lang-ta h3, .ai-response.lang-te h3 {
+                font-size: 1.6rem;
+            }
+
+            .ai-response ul, .ai-response ol {
+                margin: 1rem 0;
+                padding-left: 2rem;
+            }
+
+            .ai-response li {
+                margin-bottom: 0.8rem;
+                line-height: 1.6;
+            }
+
+            .ai-response li strong {
+                color: #e74c3c;
+                font-weight: 700;
+            }
+
+            .ai-response p {
+                margin-bottom: 1rem;
+            }
+
+            .cursor {
+                animation: blink 1s infinite;
+                color: #667eea;
+                font-weight: bold;
+            }
+
+            @keyframes blink {
+                0%, 50% { opacity: 1; }
+                51%, 100% { opacity: 0; }
+            }
+            .ai-avatar {
+                position: absolute;
+                top: -10px;
+                left: -10px;
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1rem;
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+            }
+
+            .typing-indicator {
+                display: none;
+                align-items: center;
+                gap: 0.5rem;
+                color: #666;
+                font-style: italic;
+                margin-bottom: 1rem;
+            }
+
+            .typing-dots {
+                display: flex;
+                gap: 0.2rem;
+            }
+
+            .typing-dot {
+                width: 8px;
+                height: 8px;
+                background: #4CAF50;
+                border-radius: 50%;
+                animation: typing 1.4s infinite ease-in-out;
+            }
+
+            .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+            .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+            .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+            /* Animations */
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes typing {
+                0%, 80%, 100% {
+                    transform: scale(0);
+                    opacity: 0.5;
+                }
+                40% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .typewriter {
+                overflow: hidden;
+                white-space: nowrap;
+                border-right: 2px solid #4CAF50;
+                animation: typing-text 3s steps(100, end), blink-cursor 0.75s step-end infinite;
+                width: 0;
+            }
+
+            @keyframes typing-text {
+                from { width: 0; }
+                to { width: 100%; }
+            }
+
+            @keyframes blink-cursor {
+                from, to { border-color: transparent; }
+                50% { border-color: #4CAF50; }
+            }
+
+            .suggestion-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+            }
+
+            .chip {
+                background: rgba(76, 175, 80, 0.1);
+                color: #2E7D32;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                border: 1px solid rgba(76, 175, 80, 0.2);
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: 500;
+            }
+
+            .chip:hover {
+                background: rgba(76, 175, 80, 0.2);
+                transform: translateY(-2px);
+                box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                #ai-assistant {
+                    padding: 1rem;
+                }
+
+                .page-header h1 {
+                    font-size: 2rem;
+                }
+
+                .chat-body {
+                    padding: 1.5rem;
+                }
+
+                .chat-input {
+                    padding: 1rem 4rem 1rem 1rem;
+                    font-size: 0.95rem;
+                }
+
+                .ask-button {
+                    padding: 0.6rem 1.2rem;
+                    font-size: 0.9rem;
+                }
+
+                .suggestion-chips {
+                    gap: 0.5rem;
+                }
+
+                .chip {
+                    font-size: 0.8rem;
+                    padding: 0.4rem 0.8rem;
+                }
+            }
+
+    /* Health Predictor Section Styles */
+            #predictor {
+                background: #f8f9fa;
+                min-height: 100vh;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .predictor-container {
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                border: 1px solid rgba(76, 175, 80, 0.1);
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .predictor-header {
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                padding: 2rem;
+                color: white;
+                text-align: center;
+            }
+
+            .predictor-icon {
+                width: 80px;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                margin: 0 auto 1rem;
+            }
+
+            .predictor-header h2 {
+                font-size: 1.8rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+
+            .predictor-header p {
+                opacity: 0.9;
+                font-size: 1rem;
+            }
+
+            .predictor-form {
+                padding: 2.5rem;
+            }
+
+            .form-grid {
+                display: grid;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .input-group {
+                position: relative;
+            }
+
+            .input-label {
+                display: block;
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: #2E7D32;
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .symptom-select {
+                width: 100%;
+                padding: 1rem 1.5rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-family: 'Space Grotesk', sans-serif;
+                background: #fafafa;
+                transition: all 0.3s ease;
+                outline: none;
+                cursor: pointer;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 1rem center;
+                background-repeat: no-repeat;
+                background-size: 1rem;
+            }
+
+            .symptom-select:focus {
+                border-color: #4CAF50;
+                background: white;
+                box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
+            }
+
+            .symptom-select:hover {
+                border-color: #66BB6A;
+            }
+
+            .predict-button {
+                width: 100%;
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 1.2rem 2rem;
+                font-size: 1.1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.75rem;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .predict-button:hover {
+                background: linear-gradient(135deg, #45a049, #5cb85c);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            }
+
+            .predict-button:active {
+                transform: translateY(0);
+            }
+
+            .predict-button:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .loading-spinner {
+                width: 20px;
+                height: 20px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top: 2px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                position: absolute;
+                left: 800px;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .prediction-result {
+                display: none;
+                margin-top: 2rem;
+                padding: 2rem;
+                background: linear-gradient(135deg, #f8fff9, #e8f8e8);
+                border-radius: 12px;
+                border: 2px solid rgba(76, 175, 80, 0.2);
+                animation: slideIn 0.5s ease-out;
+            }
+
+            .prediction-result.active {
+                display: block;
+            }
+
+            .result-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .result-icon {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+            }
+
+            .result-title {
+                font-size: 1.4rem;
+                font-weight: 600;
+                color: #2E7D32;
+                margin: 0;
+            }
+
+            .predicted-disease {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                border-left: 4px solid #4CAF50;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .disease-name {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: #2E7D32;
+                margin-bottom: 0.5rem;
+            }
+
+            .confidence-score {
+                font-size: 0.95rem;
+                color: #666;
+                margin-bottom: 1rem;
+            }
+
+            .confidence-bar {
+                width: 100%;
+                height: 8px;
+                background: #e0e0e0;
+                border-radius: 4px;
+                overflow: hidden;
+                margin-bottom: 1rem;
+            }
+
+            .confidence-fill {
+                height: 100%;
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border-radius: 4px;
+                transition: width 1s ease-out;
+            }
+
+            .disease-description {
+                font-size: 0.95rem;
+                color: #555;
+                line-height: 1.6;
+            }
+
+            .download-report {
+                background: linear-gradient(135deg, #2E7D32, #4CAF50);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 1rem 2rem;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                font-family: 'Space Grotesk', sans-serif;
+                margin-top: 1rem;
+            }
+
+            .download-report:hover {
+                background: linear-gradient(135deg, #1B5E20, #2E7D32);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            }
+
+            .symptoms-summary {
+                background: rgba(76, 175, 80, 0.05);
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+            }
+
+            .symptoms-summary h4 {
+                color: #2E7D32;
+                margin-bottom: 0.5rem;
+                font-size: 1rem;
+            }
+
+            .symptoms-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .symptom-tag {
+                background: rgba(76, 175, 80, 0.1);
+                color: #2E7D32;
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                border: 1px solid rgba(76, 175, 80, 0.2);
+            }
+
+            /* Animations */
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                #predictor {
+                    padding: 1rem;
+                }
+
+                .page-header h1 {
+                    font-size: 2rem;
+                }
+
+                .predictor-form {
+                    padding: 1.5rem;
+                }
+
+                .form-grid {
+                    gap: 1rem;
+                }
+
+                .symptom-select {
+                    padding: 0.875rem 1rem;
+                    font-size: 0.95rem;
+                }
+
+                .predict-button {
+                    padding: 1rem 1.5rem;
+                    font-size: 1rem;
+                }
+
+                .prediction-result {
+                    padding: 1.5rem;
+                }
+            }
+
+            /* Doctor Locator Section Styles */
+            #doctor-locator {
+                background: #f8f9fa;
+                min-height: 100vh;
+                font-family: 'Space Grotesk', sans-serif;
+            }
+
+            .locator-container {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 2rem;
+                max-width: 1200px;
+                margin: 0 auto 2rem;
+            }
+
+            .locator-panel {
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                padding: 1.6rem;
+                border: 1px solid rgba(76, 175, 80, 0.1);
+                height: fit-content;
+            }
+
+            .panel-header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .panel-icon {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+            }
+
+            .panel-header h2 {
+                color: #2E7D32;
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .location-status {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 1rem;
+                background: #f8f9fa;
+                border-radius: 12px;
+                margin-bottom: 1.5rem;
+                border-left: 4px solid #4CAF50;
+            }
+
+            .status-icon {
+                width: 24px;
+                height: 24px;
+                background: #4CAF50;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 0.8rem;
+            }
+
+            .location-text {
+                font-size: 0.95rem;
+                color: #333;
+                font-weight: 500;
+            }
+
+            .loading-spinner2 {
+                display: none;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border: 4px solid #e0e0e0;
+                border-top: 4px solid #4CAF50;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 1rem;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .hospital-selector {
+                margin-bottom: 1.5rem;
+            }
+
+            .selector-label {
+                display: block;
+                font-size: 1rem;
+                font-weight: 600;
+                color: #2E7D32;
+                margin-bottom: 0.75rem;
+            }
+
+            .hospital-select {
+                width: 100%;
+                padding: 1rem 1.5rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-family: 'Space Grotesk', sans-serif;
+                background: white;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                outline: none;
+            }
+
+            .hospital-select:focus {
+                border-color: #4CAF50;
+                box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            }
+
+            .hospital-select:disabled {
+                background: #f5f5f5;
+                cursor: not-allowed;
+                color: #999;
+            }
+
+            .hospital-info {
+                display: none;
+                background: linear-gradient(135deg, rgba(76, 175, 80, 0.05), rgba(102, 187, 106, 0.05));
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin-top: 1rem;
+                border: 1px solid rgba(76, 175, 80, 0.2);
+            }
+
+            .hospital-info.active {
+                display: block;
+                animation: slideIn 0.3s ease-out;
+            }
+
+            .hospital-name {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #2E7D32;
+                margin-bottom: 0.5rem;
+            }
+
+            .hospital-details {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .detail-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+            .detail-item i {
+                width: 16px;
+                color: #4CAF50;
+            }
+
+            .directions-button {
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 100%;
+                margin-top: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .directions-button:hover {
+                background: linear-gradient(135deg, #45a049, #5cb85c);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+            }
+
+            .map-container {
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                border: 1px solid rgba(76, 175, 80, 0.1);
+                height: 550px;
+                position: relative;
+            }
+
+            .map-placeholder      { position: relative; width: 100%; height: 100%; }
+            #map { width: 100%; height: 100%; }
+
+            .map-icon {
+                position: absolute;
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 3rem; color: #888;
+                z-index: 10;
+            }
+            
+
+            .error-message {
+                background: #ffebee;
+                color: #c62828;
+                padding: 1rem;
+                border-radius: 12px;
+                border-left: 4px solid #f44336;
+                margin-bottom: 1rem;
+                display: none;
+            }
+
+            .error-message.active {
+                display: block;
+            }
+
+            .retry-button {
+                background: #f44336;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                cursor: pointer;
+                margin-top: 0.5rem;
+                transition: background 0.3s ease;
+            }
+
+            .retry-button:hover {
+                background: #d32f2f;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                #doctor-locator {
+                    padding: 1rem;
+                }
+
+                .page-header h1 {
+                    font-size: 2rem;
+                }
+
+                .locator-container {
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                }
+
+                .locator-panel {
+                    padding: 1.5rem;
+                }
+
+                .map-container {
+                    height: 400px;
+                }
+
+                .panel-header {
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 0.5rem;
+                }
+
+                .panel-header h2 {
+                    font-size: 1.25rem;
+                }
+            }
+
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .map-iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+
+            
+    /* Image Upload Section */
+    .image-upload-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(76, 175, 80, 0.1);
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 2rem 2.5rem 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .upload-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        padding: 2.5rem;
+    }
+
+    /* Upload Area */
+    .upload-area {
+        border: 2px dashed rgba(76, 175, 80, 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: rgba(76, 175, 80, 0.02);
+        cursor: pointer;
+        position: relative;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .upload-area:hover {
+        border-color: #4CAF50;
+        background: rgba(76, 175, 80, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .upload-area.drag-over {
+        border-color: #4CAF50;
+        background: rgba(76, 175, 80, 0.1);
+    }
+
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .upload-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .upload-text h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-text p {
+        color: #666;
+        font-weight: 300;
+        margin-bottom: 1rem;
+    }
+
+    .upload-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .uploaded-image {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .remove-image {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .remove-image:hover {
+        background: #d32f2f;
+    }
+
+    /* Results Area */
+    .results-area {
+        background: rgba(76, 175, 80, 0.02);
+        border: 1px solid rgba(76, 175, 80, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        min-height: 300px;
+    }
+
+    .results-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .results-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .results-icon i {
+        font-size: 1.2rem;
+        color: white;
+    }
+
+    .results-header h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2E7D32;
+    }
+
+    .no-results {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        margin-top: 2rem;
+    }
+
+    .disease-result {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #4CAF50;
+    }
+
+    .disease-name {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+
+    .disease-type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .disease-type-badge.viral {
+        background: rgba(255, 193, 7, 0.2);
+        color: #FF8F00;
+    }
+
+    .disease-type-badge.bacterial {
+        background: rgba(244, 67, 54, 0.2);
+        color: #C62828;
+    }
+
+    .disease-type-badge.condition {
+        background: rgba(33, 150, 243, 0.2);
+        color: #1976D2;
+    }
+
+    .disease-details {
+        margin-top: 1rem;
+    }
+
+    .disease-details span {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+
+    .confidence-score {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(76, 175, 80, 0.05);
+        border-radius: 6px;
+        border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+
+    .confidence-text {
+        font-size: 0.9rem;
+        color: #2E7D32;
+        font-weight: 500;
+    }
+
+    .confidence-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(76, 175, 80, 0.2);
+        border-radius: 3px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #66BB6A);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .upload-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .section-header {
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .upload-area {
+            min-height: 250px;
+            padding: 1.5rem;
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .upload-icon i {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Report Generation Section Styles */
+    .report-generation-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Initial State Styles */
+    .report-initial-state {
+        display: block;
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .report-hero {
+        background: white;
+        border-radius: 20px;
+        padding: 4rem 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .report-hero:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .report-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+    }
+
+    .report-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .report-hero h2 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+
+    .report-hero p {
+        font-size: 1.1rem;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .generate-report-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .generate-report-btn:hover {
+        background: linear-gradient(135deg, #66BB6A, #4CAF50);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    }
+
+    .generate-report-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Loading State Styles */
+    .report-loading-state {
+        display: none;
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .loading-animation {
+        background: white;
+        border-radius: 20px;
+        padding: 4rem 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.1);
+    }
+
+    .loading-spinner {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 2rem;
+    }
+
+    .spinner-ring {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 3px solid transparent;
+        border-radius: 50%;
+        animation: spin 1.5s linear infinite;
+    }
+
+    .spinner-ring:nth-child(1) {
+        border-top-color: #4CAF50;
+        animation-delay: 0s;
+    }
+
+    .spinner-ring:nth-child(2) {
+        border-right-color: #66BB6A;
+        animation-delay: 0.3s;
+    }
+
+    .spinner-ring:nth-child(3) {
+        border-bottom-color: #81C784;
+        animation-delay: 0.6s;
+    }
+
+    .spinner-ring:nth-child(4) {
+        border-left-color: #A5D6A7;
+        animation-delay: 0.9s;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-animation h3 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.75rem;
+    }
+
+    .loading-animation p {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .loading-progress {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(76, 175, 80, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #66BB6A);
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.3s ease;
+        animation: progressGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes progressGlow {
+        0% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+        50% { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
+        100% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+    }
+
+    .progress-text {
+        font-size: 0.9rem;
+        color: #4CAF50;
+        font-weight: 600;
+    }
+
+    /* Report Display State Styles */
+    .report-display-state {
+        display: none;
+        padding: 2rem 0;
+    }
+
+    .report-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .report-header h2 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #2E7D32;
+        margin-bottom: 0.5rem;
+    }
+
+    .report-header p {
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    .pdf-viewer-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .pdf-page-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .pdf-page {
+        aspect-ratio: 0.707; /* A4 ratio */
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pdf-page:hover {
+        border-color: #4CAF50;
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+    }
+
+    .pdf-placeholder {
+        text-align: center;
+        color: #666;
+    }
+
+    .pdf-placeholder i {
+        font-size: 3rem;
+        color: #e74c3c;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .pdf-placeholder span {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* When actual PDF is loaded */
+    .pdf-page canvas,
+    .pdf-page iframe {
+        width: 100%;
+        height: 100%;
+        border-radius: 6px;
+    }
+
+    .report-actions {
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .download-btn,
+    .regenerate-btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+    }
+
+    .download-btn {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .download-btn:hover {
+        background: linear-gradient(135deg, #66BB6A, #4CAF50);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    }
+
+    .regenerate-btn {
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+    }
+
+    .regenerate-btn:hover {
+        border-color: #4CAF50;
+        color: #4CAF50;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .report-hero,
+        .loading-animation {
+            padding: 2.5rem 2rem;
+        }
+        
+        .report-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-icon i {
+            font-size: 2rem;
+        }
+        
+        .report-hero h2 {
+            font-size: 1.8rem;
+        }
+        
+        .pdf-page-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .pdf-viewer-container {
+            padding: 1rem;
+        }
+        
+        .report-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .download-btn,
+        .regenerate-btn {
+            width: 100%;
+            max-width: 250px;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .report-generation-container {
+            padding: 0 1rem;
+        }
+        
+        .report-hero,
+        .loading-animation {
+            padding: 2rem 1.5rem;
+        }
+        
+        .report-hero h2 {
+            font-size: 1.6rem;
+        }
+        
+        .report-hero p {
+            font-size: 1rem;
+        }
+        
+        .generate-report-btn {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* Animation for state transitions */
+    .report-initial-state.fade-out,
+    .report-loading-state.fade-out,
+    .report-display-state.fade-out {
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+
+    .report-loading-state.fade-in,
+    .report-display-state.fade-in {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="fas fa-paw"></i>
+        <span>VetAI</span>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li class="nav-item active">
+        <a href="#home" class="nav-link">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#ai-assistant" class="nav-link">
+          <i class="fas fa-robot"></i>
+          <span>AI Assistant</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#image-upload" class="nav-link">
+          <i class="fas fa-camera"></i>
+          <span>Image Upload</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#visualization" class="nav-link">
+          <i class="fas fa-chart-bar"></i>
+          <span>Visualization</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#predictor" class="nav-link">
+          <i class="fas fa-brain"></i>
+          <span>Predictor</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#doctor-locator" class="nav-link">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Doctor Locator</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#report-generation" class="nav-link">
+          <i class="fas fa-file-alt"></i>
+          <span>Report Generation</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="content-wrapper">
+      <!-- Home Section -->
+      <section id="home" class="content-section active">
+        <div class="page-header">
+          <h1>Welcome to VetAI Dashboard</h1>
+          <p>Your AI-powered veterinary assistant for comprehensive animal care</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3>AI Assistant</h3>
+            <p>Get instant answers to veterinary questions with our advanced AI</p>
+          </div>
+
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Data Visualization</h3>
+            <p>Visualize animal health data with interactive charts and graphs</p>
+          </div>
+
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-brain"></i>
+            </div>
+            <h3>Health Predictor</h3>
+            <p>Predict potential health issues using machine learning</p>
+          </div>
+
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h3>Doctor Locator</h3>
+            <p>Locate veterinary doctors in 5Km Radius</p>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h3>Report Generation</h3>
+            <p>Generate two page report with visualization and AI analysis</p>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h3>Image Upload</h3>
+            <p>Detect the Disease of cattle by uploading images</p>
+          </div>
+        </div>
+        <!-- Disease Information Section -->
+        <div class="disease-section">
+          <h2>Common Animal Diseases</h2>
+          <p>Learn about prevalent diseases affecting livestock and their characteristics</p>
+
+          <div class="disease-carousel">
+            <div class="carousel-container" id="carouselContainer">
+              <!-- Cattle Disease Cards -->
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/lumpskin.jpg" alt="Lumpy Skin Disease" />
+                  <div class="disease-type viral">Viral</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Lumpy Skin Disease</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Virus: Capripoxvirus</span>
+                    <span class="affected">Affects: Cattle</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/mouth.jpg" alt="Foot and Mouth Disease" />
+                  <div class="disease-type viral">Viral</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Foot and Mouth Disease</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Virus: Aphthovirus</span>
+                    <span class="affected">Affects: Cloven-hoofed animals</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/anthraax.jpg"
+                    alt="Anthrax" />
+                  <div class="disease-type bacterial">Bacterial</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Anthrax</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Bacteria: Bacillus anthracis</span>
+                    <span class="affected">Affects: Cattle, Sheep</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/blackleg.jpg"
+                    alt="Blackleg" />
+                  <div class="disease-type bacterial">Bacterial</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Blackleg</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Bacteria: Clostridium chauvoei</span>
+                    <span class="affected">Affects: Young Cattle</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/mastis.jpg"
+                    alt="Mastitis" />
+                  <div class="disease-type bacterial">Bacterial</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Mastitis</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Bacteria: Various pathogens</span>
+                    <span class="affected">Affects: Dairy Cattle</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/ibr.jpeg" alt="IBR" />
+                  <div class="disease-type viral">Viral</div>
+                </div>
+                <div class="disease-info">
+                  <h3>IBR (Infectious Bovine Rhinotracheitis)</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Virus: Bovine Herpesvirus-1</span>
+                    <span class="affected">Affects: Feedlot Cattle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Duplicate cards for seamless infinite scroll -->
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/lumpskin.jpg" alt="Lumpy Skin Disease" />
+                  <div class="disease-type viral">Viral</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Lumpy Skin Disease</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Virus: Capripoxvirus</span>
+                    <span class="affected">Affects: Cattle</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/mouth.jpg" alt="Foot and Mouth Disease" />
+                  <div class="disease-type viral">Viral</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Foot and Mouth Disease</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Virus: Aphthovirus</span>
+                    <span class="affected">Affects: Cloven-hoofed animals</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="disease-card">
+                <div class="disease-image">
+                  <img src="/asset/anthraax.jpg"
+                    alt="Anthrax" />
+                  <div class="disease-type bacterial">Bacterial</div>
+                </div>
+                <div class="disease-info">
+                  <h3>Anthrax</h3>
+                  <div class="disease-details">
+                    <span class="pathogen">Bacteria: Bacillus anthracis</span>
+                    <span class="affected">Affects: Cattle, Sheep</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </section>
+
+      <!-- AI Assistant Section -->
+      <section id="ai-assistant" class="content-section">
+        <div class="page-header">
+          <h1>AI Assistant</h1>
+          <p>Chat with our AI veterinary expert</p>
+        </div>
+
+        <!-- 🔀 Language Selector -->
+        <div class="language-toggle" style="margin-bottom: 10px;">
+          <label for="languageSelect" style="font-weight: bold; margin-right: 8px;">Language:</label>
+          <select id="languageSelect" class="language-dropdown lang-select">
+            <option value="en">English</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+
+          </select>
+        </div>
+        <div class="ai-chat-container">
+          <div class="chat-body">
+            <div class="input-container">
+              <input type="text" class="chat-input"
+                placeholder="Ask me anything about veterinary care, animal health, or treatment options..."
+                id="chatInput">
+              <button class="ask-button" id="askButton">
+                <i class="fas fa-paper-plane"></i>
+                Ask
+              </button>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+              <i class="fas fa-robot"></i>
+              <span>AI is thinking</span>
+              <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+            </div>
+
+            <div class="response-container" id="responseContainer">
+              <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="ai-response" id="aiResponse"></div>
+            </div>
+
+            <div class="suggestion-chips">
+              <div class="chip" data-suggestion= "What is lumpy skin disease?">
+                <i class="fas fa-question-circle"></i> What is lumpy skin disease?
+              </div>
+              <div class="chip" data-suggestion="First aid for cattle injury">
+                <i class="fas fa-stethoscope"></i> First aid for cattle injury
+              </div>
+              <div class="chip" data-suggestion="Precautionary measures to avoid disease in cattles">
+                <i class="fas fa-chart-line"></i> Precautionary measures to avoid disease in cattles
+              </div>
+              <div class="chip" data-suggestion="Treatment for foot and mouth disease">
+                <i class="fas fa-list"></i> Treatment for foot and mouth disease
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="image-upload" class="content-section">
+        <div class="image-upload-section">
+          <div class="section-header">
+            <h2>AI Disease Detection</h2>
+            <p>Upload an image of your animal to detect diseases using advanced AI technology</p>
+          </div>
+
+          <div class="upload-container">
+            <!-- Upload Area -->
+            <div class="upload-area" id="uploadArea">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-text">
+                <h3>Upload Animal Image</h3>
+                <p>Drag and drop an image here or click to browse</p>
+                <button class="upload-btn" >
+                  <i class="fas fa-folder-open"></i> Choose File
+                </button>
+              </div>
+              <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+
+            <!-- Results Area -->
+            <div class="results-area">
+              <div class="results-header">
+                <div class="results-icon">
+                  <i class="fas fa-stethoscope"></i>
+                </div>
+                <h3>Detection Results</h3>
+              </div>
+
+              <div id="resultsContent">
+                <div id="lumpyResult" class="result-row" style="display: none;">
+                  <strong>Lumpy Skin Disease:</strong> <span id="lumpyStatus">-</span>
+                </div>
+                <div id="mouthResult" class="result-row" style="display: none;">
+                  <strong>Mouth Disease:</strong> <span id="mouthStatus">-</span>
+                </div>
+                <div id="bcsResult" class="result-row" style="display: none;">
+                  <strong>BCS Score:</strong> <span id="bcsStatus">-</span>
+                </div>
+                <div id="noDetectionMessage" class="result-row" style="color: gray; margin-top: 1rem; display:none">
+                  <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
+                  No visible disease detected.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; margin-bottom: 1rem; text-align: center;">
+            <button id="predictButton" class="upload-btn">
+              <i class="fas fa-microscope"></i> <span id="buttonText">Predict Disease</span>
+            </button>
+          </div>
+
+        </div>
+    </section>
+
+    <!-- Visualization Section -->
+    <section id="visualization" class="content-section">
+      <div class="section-header">
+        <h1>Data Visualization</h1>
+        <p>Interactive charts and analytics</p>
+      </div>
+
+      <div class="grafana-embed">
+        <iframe
+          src="http://localhost:3010/d/06629ffb-6878-49f3-9d42-f717f4e4347f/virtusa-final?kiosk&fullscreen&orgId=1&refresh=10s"
+          width="100%" height="800" frameborder="0">
+        </iframe>
+      </div>
+    </section>
+
+    <!-- Predictor Section -->
+    <section id="predictor" class="content-section">
+      <div class="page-header-predict">
+        <h1>Health Predictor</h1>
+        <p>AI-powered health predictions based on symptoms</p>
+      </div>
+
+      <div class="predictor-container">
+        <div class="predictor-form">
+          <div class="form-grid">
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-thermometer-half"></i>
+                Primary Symptom
+              </label>
+              <select class="symptom-select" id="symptom1">
+                <option value="">Select primary Symptom...</option>
+                <option value="fever">Fever</option>
+                <option value="lethargy/weakness">Lethargy/Weakness</option>
+                <option value="loss of appetite">Loss of Appetite</option>
+                <option value="vomiting">Vomiting</option>
+                <option value="diarrhea">Diarrhea</option>
+                <option value="coughing">Coughing</option>
+                <option value="difficulty breathing">Difficulty Breathing</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-eye"></i>
+                Behavioral Changes
+              </label>
+              <select class="symptom-select" id="symptom2">
+                <option value="">Select behavioral changes...</option>
+                <option value="excessive drinking">Excessive Drinking</option>
+                <option value="excessive urination">Excessive Urination</option>
+                <option value="restlessness">Restlessness</option>
+                <option value="hiding/withdrawal">Hiding/Withdrawal</option>
+                <option value="unusual aggression">Unusual Aggression</option>
+                <option value="disorientation">Disorientation</option>
+                <option value="excessive sleeping">Excessive Sleeping</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-heartbeat"></i>
+                Physical Symptoms
+              </label>
+              <select class="symptom-select" id="symptom3">
+                <option value="">Select physical symptoms...</option>
+                <option value="limping">Limping</option>
+                <option value="swelling">Swelling</option>
+                <option value="skin irritation">Skin Irritation</option>
+                <option value="hair loss">Hair Loss</option>
+                <option value="weight loss">Weight Loss</option>
+                <option value="weight gain">Weight Gain</option>
+                <option value="pale gums">Pale Gums</option>
+                <option value="bad breath">Bad Breath</option>
+                <option value="sneezing">Sneezing</option>
+                <option value="difficulty urinating">Difficulty Urinating</option>
+                <option value="excessive panting">Excessive Panting</option>
+                <option value="seizures">Seizures</option>
+                <option value="nasal discharge">Nasal Discharge</option>
+                <option value="trembling">Trembling</option>
+              </select>
+              
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-utensils"></i>
+                Digestive Issues
+              </label>
+              <select class="symptom-select" id="symptom4">
+                <option value="">Select digestive issues...</option>
+                <option value="constipation">Constipation</option>
+                <option value="bloody stool">Bloody Stool</option>
+                <option value="abdominal pain">Abdominal Pain</option>
+                <option value="bloating">Bloating</option>
+                <option value="excessive drooling">Excessive Drooling</option>
+                <option value="difficulty swallowing">Difficulty Swallowing</option>
+                <option value="regurgitation">Regurgitation</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-lungs"></i>
+                Respiratory & Other
+              </label>
+              <select class="symptom-select" id="symptom5">
+                <option value="">Select additional symptoms...</option>
+                <option value="nasal discharge">Nasal Discharge</option>
+                <option value="difficulty swallowing">Difficulty Swallowing</option>
+                <option value="disorientation">Disorientation</option>
+                <option value="bloody stool">Bloody Stool</option>
+                <option value="weight loss">Weight Loss</option>
+                <option value="skin irritation">Skin Irritation</option>
+                <option value="sneezing">Sneezing</option>
+                <option value="bloating">Bloating</option>
+                <option value="pale gums">Pale Gums</option>
+                <option value="trembling">Trembling</option>
+                <option value="excessive panting">Excessive Panting</option>
+                <option value="seizures">Seizures</option>
+                <option value="bad breath">Bad Breath</option>
+                <option value="restlessness">Restlessness</option>
+                <option value="difficulty urinating">Difficulty Urinating</option>
+                <option value="abdominal pain">Abdominal Pain</option>
+                <option value="weight gain">Weight Gain</option>
+                <option value="limping">Limping</option>
+                <option value="excessive urination">Excessive Urination</option>
+                <option value="excessive drooling">Excessive Drooling</option>
+                <option value="excessive drinking">Excessive Drinking</option>
+                <option value="hiding/withdrawal">Hiding/Withdrawal</option>
+                <option value="regurgitation">Regurgitation</option>
+                <option value="swelling">Swelling</option>
+                <option value="unusual aggression">Unusual Aggression</option>
+                <option value="constipation">Constipation</option>
+                <option value="excessive sleeping">Excessive Sleeping</option>
+                <option value="hair loss">Hair Loss</option>
+
+              </select>
+            </div>
+          </div>
+
+          <button class="predict-button" id="prediction">
+            <span id="buttonText">Analyze Symptoms</span>
+          </button>
+
+          <div class="prediction-result" id="predictionResult">
+            <div class="result-header">
+              <div class="result-icon">
+                <i class="fas fa-clipboard-check"></i>
+              </div>
+              <h3 class="result-title">Prediction Results</h3>
+            </div>
+
+            <div class="predicted-disease" id="predictedDisease">
+              <div class="disease-name" id="diseaseName"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Doctor Locator Section -->
+    <section id="doctor-locator" class="content-section">
+      <div class="page-header page-header-doctor" style="margin-bottom: 1rem;">
+        <h1>Doctor Locator</h1>
+      </div>
+
+      <div class="locator-container">
+        <!-- Control Panel -->
+        <div class="locator-panel">
+          <div class="panel-header">
+            <div class="panel-icon">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h2>Find Hospitals</h2>
+          </div>
+
+          <div class="location-status" id="locationStatus">
+            <div class="status-icon">
+              <i class="fas fa-crosshairs"></i>
+            </div>
+            <div class="location-text">Click to detect your location</div>
+          </div>
+
+          <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorText">Unable to access location. Please enable location services.</span>
+            <button class="retry-button" onclick="getCurrentLocation()">Retry</button>
+          </div>
+
+          <div class="loading-spinner2" id="loadingSpinner2">
+            <div class="spinner"></div>
+            <p>Searching for nearby veterinary hospitals...</p>
+          </div>
+
+          <div class="hospital-selector">
+            <label class="selector-label" for="hospitalSelect">
+              Select Veterinary Hospital
+            </label>
+            <select class="hospital-select" id="hospitalSelect" disabled>
+              <option value="">Detect location first to see nearby hospitals</option>
+            </select>
+          </div>
+
+          <div class="hospital-info" id="hospitalInfo">
+            <div class="hospital-name" id="hospitalName"></div>
+            <div class="hospital-details">
+              <div class="detail-item">
+                <i class="fas fa-route"></i>
+                <span id="hospitalDistance"></span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-phone"></i>
+                <span id="hospitalPhone"></span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-star"></i>
+                <span id="hospitalRating"></span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <span id="hospitalHours"></span>
+              </div>
+            </div>
+            <button class="directions-button" onclick="showDirections()">
+              <i class="fas fa-directions"></i>
+              Get Directions
+            </button>
+          </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container" id="mapContainer">
+          <div class="map-placeholder">
+            <i class="fas fa-map map-icon" id="map-icon"></i>
+            <div class="map" id="map">
+              <!--<p>Map will appear here once you select a hospital</p>
+                                <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem;">
+                                    Location detection required to show nearby veterinary hospitals
+                                </p> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="report-generation" class="content-section">
+      <div class="report-generation-container">
+        <!-- Initial State -->
+        <div class="report-initial-state" id="reportInitialState">
+          <div class="report-hero">
+            <div class="report-icon">
+              <i class="fas fa-file-medical-alt"></i>
+            </div>
+            <h2>Generate Veterinary Report</h2>
+            <p>Create detailed analysis reports for animal health assessments, treatment recommendations, and diagnostic
+              summaries.</p>
+
+            <button class="generate-report-btn" id="generateReportBtn">
+              <i class="fas fa-magic"></i>
+              Generate Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="report-loading-state" id="reportLoadingState">
+          <div class="loading-animation">
+            <div class="loading-spinner">
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+            </div>
+            <h3>Generating Report...</h3>
+            <p>AI is analyzing data and preparing your comprehensive veterinary report</p>
+            <div class="loading-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <span class="progress-text" id="progressText">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Display State -->
+        <div class="report-display-state" id="reportDisplayState">
+          <div class="report-header">
+            <h2>Generated Report</h2>
+            <p>Your veterinary report has been successfully generated</p>
+          </div>
+
+          <div class="pdf-viewer-container">
+            <div class="pdf-page-container">
+              <div class="pdf-page" id="pdfPage1">
+                <div class="pdf-placeholder">
+                  <i class="fas fa-file-pdf"></i>
+                  <span>Page 1</span>
+                </div>
+              </div>
+              <div class="pdf-page" id="pdfPage2">
+                <div class="pdf-placeholder">
+                  <i class="fas fa-file-pdf"></i>
+                  <span>Page 2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-actions">
+            <button class="download-btn" id="downloadReportBtn">
+              <i class="fas fa-download"></i>
+              Download Report
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+  </main>
+
+  <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <script> // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const navItems = document.querySelectorAll('.nav-item');
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+
+            // Function to show selected section
+            function showSection(targetId) {
+                // Hide all sections
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                // Show target section
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Update active nav item
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Find and activate the corresponding nav item
+                const activeNavItem = document.querySelector(`[href="#${targetId}"]`).closest('.nav-item');
+                if (activeNavItem) {
+                    activeNavItem.classList.add('active');
+                }
+            }
+
+            // Add click event listeners to nav links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href').substring(1);
+                    showSection(targetId);
+
+                    // Close mobile menu if open
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+
+            // Mobile menu toggle functionality
+            mobileToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('open');
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('open');
+                }
+            });
+
+            // Initialize with home section active
+            showSection('home');
+        });
+
+        // Smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';   
+        const chatInput = document.getElementById('chatInput');
+        const askButton = document.getElementById('askButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const responseContainer = document.getElementById('responseContainer');
+        const aiResponse = document.getElementById('aiResponse');
+        const suggestionChips = document.querySelectorAll('.chip');
+
+        const projectDescription = `VetAI is an innovative AI-powered veterinary assistant dashboard designed to revolutionize animal healthcare. Our platform combines cutting-edge artificial intelligence with comprehensive veterinary tools to provide instant expert guidance, predictive health analytics, interactive data visualization, and intelligent analysis of medical records. Whether you're diagnosing symptoms, analyzing lab results, or seeking treatment recommendations, VetAI serves as your intelligent companion in delivering exceptional animal care. The platform also features a veterinary specialist locator to help you find the right expertise when you need it most.`;
+
+        function typeWriter(markdown, element, speed = 30) {
+                marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false // sanitize later, after animation
+            });
+
+            // Get language and set CSS class
+            const selectedLang = document.getElementById("languageSelect").value;
+            element.className = `ai-response lang-${selectedLang}`;
+            element.setAttribute("lang", selectedLang);
+
+            // Animate markdown text (not HTML)
+            const textArray = Array.from(markdown); // <-- RAW markdown
+            let currentIndex = 0;
+            const cursor = '<span class="cursor">|</span>';
+
+            function type() {
+                if (currentIndex < textArray.length) {
+                    const currentText = textArray.slice(0, currentIndex + 1).join('');
+                    element.innerHTML = DOMPurify.sanitize(marked.parse(currentText)) + cursor;
+                    currentIndex++;
+
+                    const adjustedSpeed = (selectedLang === 'ta' || selectedLang === 'te') ? speed * 1.2 : speed;
+                    setTimeout(type, adjustedSpeed);
+                } else {
+                    // Final HTML rendering (fully parsed)
+                    element.innerHTML = DOMPurify.sanitize(marked.parse(markdown));
+                }
+            }
+
+            element.innerHTML = '';
+            type();
+        }
+
+        // Add this inside a <script> tag in your HTML or in your JS file
+
+        document.getElementById('askButton').addEventListener('click', handleAsk);
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleAsk();
+        });
+
+        function handleAsk() {
+            const chatInput = document.getElementById('chatInput');
+            const question = chatInput.value.trim();
+            const selectedLang = document.getElementById("languageSelect").value;
+            if (!question) return;
+            document.getElementById('aiResponse').innerHTML = '';
+            document.getElementById('typingIndicator').style.display = 'flex';
+
+            fetch('/aiassistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: question,
+                    lang: selectedLang
+                })
+            })
+                .then(res => {
+                    if(!res.ok){ throw new Error("Network response was not ok");}
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('typingIndicator').style.display = 'none';
+                    const answer = data.answer || "Sorry, no response."
+                    //console.log(answer)
+                    typeWriter(answer, document.getElementById('aiResponse'));
+                    document.getElementById('responseContainer').classList.add('active');
+                })
+                .catch(() => {
+                    document.getElementById('typingIndicator').style.display = 'none';
+                    document.getElementById('aiResponse').textContent = "Error contacting AI assistant.";
+                    document.getElementById('responseContainer').classList.add('active');
+                });
+
+            chatInput.value = '';
+        }
+
+        // Suggestion chips functionality
+        suggestionChips.forEach(chip => {
+            chip.addEventListener('click', function () {
+                const suggestion = this.getAttribute('data-suggestion');
+                chatInput.value = suggestion;
+                handleAsk();
+            });
+        });
+
+        // Focus on input when page loads
+        window.addEventListener('load', function () {
+            chatInput.focus();
+        });
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('prediction').addEventListener('click', async function () {
+        const data = {
+            'prime': document.getElementById('symptom1').value,
+            'behave': document.getElementById('symptom2').value,
+            'physical': document.getElementById('symptom3').value,
+            'digestive': document.getElementById('symptom4').value,
+            'other': document.getElementById('symptom5').value,
+        };
+        //console.log(data)
+        try {
+            const response = await fetch('/predictsymptom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            //console.log(result);
+
+            if (response.ok) {
+                document.getElementById('predictionResult').style.display = 'block';
+                document.getElementById('predictedDisease').style.display = 'block';
+                document.getElementById('diseaseName').textContent =
+                    `Possible Disease: ${result.prediction.toUpperCase()}`;
+                
+            } else {
+                document.getElementById('diseaseName').textContent = `Error: ${result.error || 'Prediction failed'}`;
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            document.getElementById('diseaseName').textContent = 'An error occurred during prediction.';
+        }
+    });
+});
+
+    document.getElementById('predictButton').addEventListener('click', async function () {
+    //const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (!file) { alert("Please upload an image first."); return; }
+
+    // UI: show loading
+    const btn = this, btnText = document.getElementById('buttonText');
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('image', file);
+    const hint = document.getElementById('uploadHint');
+    if (hint) hint.remove();
+
+    try {
+        const res = await fetch('/upload_img', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Prediction failed.');
+
+        const json = await res.json();  
+        const { diseases, bcs } = json; 
+        //console.log(json)      // { diseases: [...], bcs: 3.25 }
+        //displayPrediction(json); 
+        const rows = {
+                lumpy: document.getElementById('lumpyResult'),
+                mouth: document.getElementById('mouthResult'),
+                bcs: document.getElementById('bcsResult')
+            };
+          //console.log(rows)
+            const status = {
+                lumpy: document.getElementById('lumpyStatus'),
+                mouth: document.getElementById('mouthStatus'),
+                bcs: document.getElementById('bcsStatus')
+            };
+          //console.log(status)
+            const noDetect = document.getElementById('noDetectionMessage');
+           // const symptomsList = document.getElementById('symptomsList');
+
+            // Safety checks
+            if (!rows.lumpy || !rows.mouth || !rows.bcs || !noDetect) {
+                console.warn("One or more expected elements not found in DOM.");
+                return;
+            }
+
+            // Reset UI
+            Object.values(rows).forEach(r => r.style.display = 'none');
+            //symptomsList.innerHTML = '';
+            noDetect.style.display = 'none';
+
+            const found = new Set(diseases.map(d => d.toLowerCase()));
+
+            if (found.has('lumpy skin disease')) {
+                rows.lumpy.style.display = 'block';
+                status.lumpy.textContent = 'Detected';
+            }
+
+            if (found.has('mouth disease')) {
+                rows.mouth.style.display = 'block';
+                status.mouth.textContent = 'Detected';
+            }
+
+            //diseases.forEach(name => {
+                //symptomsList.insertAdjacentHTML('beforeend', `<span class="chip">${name}</span>`);
+            //});
+
+            if (bcs !== null) {
+                rows.bcs.style.display = 'block';
+                status.bcs.textContent = bcs.toFixed(2);
+            }
+
+            if (!diseases.length && bcs === null) {
+                noDetect.style.display = 'block';
+            }              // ✅ update UI with real result
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong while predicting.");
+    } finally {
+        btn.disabled = false;
+        btnText.textContent = 'Predict Disease';    // fixed stray </i>
+    }
+});
+
+
+       //function displayPrediction({ diseases = [], bcs = null }) {
+        // Reset all rows
+                    /* const rows = {
+                lumpy: document.getElementById('lumpyResult'),
+                mouth: document.getElementById('mouthResult'),
+                bcs: document.getElementById('bcsResult')
+            }; 
+
+            const status = {
+                lumpy: document.getElementById('lumpyStatus'),
+                mouth: document.getElementById('mouthStatus'),
+                bcs: document.getElementById('bcsStatus')
+            };
+
+            const noDetect = document.getElementById('noDetectionMessage');
+            const symptomsList = document.getElementById('symptomsList');
+
+            // Safety checks
+            if (!rows.lumpy || !rows.mouth || !rows.bcs || !noDetect || !symptomsList) {
+                console.warn("One or more expected elements not found in DOM.");
+                return;
+            }
+
+            // Reset UI
+            Object.values(rows).forEach(r => r.style.display = 'none');
+            symptomsList.innerHTML = '';
+            noDetect.style.display = 'none';
+
+            const found = new Set(diseases.map(d => d.toLowerCase()));
+
+            if (found.has('lumpy skin disease')) {
+                rows.lumpy.style.display = 'block';
+                status.lumpy.textContent = 'Detected';
+            }
+
+            if (found.has('mouth disease')) {
+                rows.mouth.style.display = 'block';
+                status.mouth.textContent = 'Detected';
+            }
+
+            diseases.forEach(name => {
+                symptomsList.insertAdjacentHTML('beforeend', `<span class="chip">${name}</span>`);
+            });
+
+            if (bcs !== null) {
+                rows.bcs.style.display = 'block';
+                status.bcs.textContent = bcs.toFixed(2);
+            }
+
+            if (!diseases.length && bcs === null) {
+                noDetect.style.display = 'block';
+            }
+            }*/
+
+// DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const resultsContent = document.getElementById('resultsContent');
+
+        // File input change handler
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (file.type.startsWith('image/')) {
+                displayUploadedImage(file);      // only show the image
+                // no fake AI delay here
+            } else {
+                alert('Please upload a valid image file.');
+            }
+            }
+
+          function resetUpload() {
+    // Reset the upload area
+    uploadArea.innerHTML = `
+        <div class="upload-text">
+            <h3>Upload Animal Image</h3>
+            <p>Drag and drop an image here or click to browse</p>
+            <button class="upload-btn">
+                <i class="fas fa-folder-open"></i> Choose File
+            </button>
+        </div>
+        <input type="file" id="fileInput" class="file-input" accept="image/*">
+    `;
+
+    // Reset file input
+    fileInput.value = '';
+
+    // Hide previous results if any
+    ['lumpyResult', 'mouthResult', 'bcsResult', 'noDetectionMessage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    const symptomsList = document.getElementById('symptomsList');
+    if (symptomsList) symptomsList.innerHTML = '';
+}
+
+
+        function displayUploadedImage(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            uploadArea.innerHTML = `
+            <img src="${e.target.result}" alt="Uploaded image" class="uploaded-image">
+            <button class="remove-image" onclick="resetUpload()">
+                <i class="fas fa-times"></i> Remove Image
+            </button>`;
+        };
+        reader.readAsDataURL(file);
+
+        // Hide previous results without deleting them
+        ['lumpyResult', 'mouthResult', 'bcsResult', 'noDetectionMessage']
+            .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+            });
+        const symptomsList = document.getElementById('symptomsList');
+        if (symptomsList) symptomsList.innerHTML = '';
+
+        // Show a small hint message
+        resultsContent.insertAdjacentHTML('afterbegin', `
+            <div id="uploadHint" class="no-results">
+            <i class="fas fa-info-circle" style="font-size:2rem;color:#ccc;margin-bottom:1rem;"></i>
+            <p>Select “Predict Disease” to analyse this image</p>
+            </div>`);
+        }
+
+
+        
+
+
+    let currentLocation = null;
+        let selectedHospital = null;
+        let nearbyHospitals = [];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function () {
+            const locationStatus = document.getElementById('locationStatus');
+            locationStatus.style.cursor = 'pointer';
+            locationStatus.addEventListener('click', getCurrentLocation);
+
+            const hospitalSelect = document.getElementById('hospitalSelect');
+            hospitalSelect.addEventListener('change', handleHospitalSelection);
+        });
+
+        function getCurrentLocation() {
+            const locationStatus = document.getElementById('locationStatus');
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner2');
+
+            errorMessage.classList.remove('active');
+            loadingSpinner.style.display = 'block';
+
+            locationStatus.innerHTML = `
+                <div class="status-icon">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="location-text">Detecting your location...</div>
+            `;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        currentLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+
+                        locationStatus.innerHTML = `
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="location-text">Location detected successfully</div>
+                        `;
+
+                        setTimeout(() => {
+                            loadNearbyHospitals();
+                        }, 1000);
+                    },
+                    function (error) {
+                        handleLocationError(error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                handleLocationError({ message: "Geolocation is not supported by this browser." });
+            }
+        }
+
+        function handleLocationError(error) {
+            const locationStatus = document.getElementById('locationStatus');
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner2');
+            const errorText = document.getElementById('errorText');
+
+            loadingSpinner.style.display = 'none';
+            errorMessage.classList.add('active');
+
+            locationStatus.innerHTML = `
+                <div class="status-icon" style="background: #f44336;">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="location-text">Location access failed</div>
+            `;
+
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorText.textContent = "Location access denied. Please enable location services.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorText.textContent = "Location information unavailable. Please try again.";
+                    break;
+                case error.TIMEOUT:
+                    errorText.textContent = "Location request timed out. Please try again.";
+                    break;
+                default:
+                    errorText.textContent = error.message || "An unknown error occurred.";
+                    break;
+            }
+        }
+
+        // function loadNearbyHospitals() {
+        //const loadingSpinner = document.getElementById('loadingSpinner2');
+        //const hospitalSelect = document.getElementById('hospitalSelect');
+
+        // Simulate API delay
+        //setTimeout(() => {
+        //nearbyHospitals = sampleHospitals;
+        //populateHospitalSelect();
+        //loadingSpinner.style.display = 'none';
+        //}, 2000);
+        //} 
+        async function loadNearbyHospitals() {
+            const loadingSpinner = document.getElementById('loadingSpinner2');
+            const errorBox = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            loadingSpinner.style.display = 'block';
+            errorBox.classList.remove('active');
+
+            try {
+                const res = await fetch('/vet_location', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentLocation)   // { lat, lng }
+                });
+
+                if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+                // Response = [{name,address,lat,lng,rating,phone,distance}, …]
+                data = await res.json();
+                //console.log(nearbyHospitals)
+                nearbyHospitals = (data.hospitals || []).map((h, idx) => ({
+                    id: idx,                         // index as simple primary key
+                    name: h.name,
+                    address: h.address,
+                    //phone: h.phone || '',
+                    rating: h.rating || '',
+                    //distance: h.distance || '',
+                    lat: h.latitude,                  // rename for Leaflet
+                    lng: h.longitude
+                }));
+                if (nearbyHospitals.length === 0)
+                    throw new Error('No veterinary clinics found within 5 km.');
+
+                populateHospitalSelect();           // fills the <select>
+            } catch (err) {
+                errorText.textContent = err.message || 'Failed to fetch clinics.';
+                errorBox.classList.add('active');
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        function populateHospitalSelect() {
+            const hospitalSelect = document.getElementById('hospitalSelect');
+
+            hospitalSelect.innerHTML = '<option value="">Select a veterinary hospital</option>';
+            hospitalSelect.disabled = true;
+            //console.log(nearbyHospitals) // Disable until options are populated
+            nearbyHospitals.forEach(h => {
+                const option = document.createElement('option');
+                option.value = h.id;
+                option.textContent = `${h.name}  (${h.rating})`;
+                hospitalSelect.appendChild(option);
+            });
+
+            hospitalSelect.disabled = false;
+        }
+
+        function handleHospitalSelection() {
+            const hospitalSelect = document.getElementById('hospitalSelect');
+            const hospitalInfo = document.getElementById('hospitalInfo');
+            const selectedId = parseInt(hospitalSelect.value);
+
+            if (!selectedId) {
+                hospitalInfo.classList.remove('active');
+                return;
+            }
+
+            selectedHospital = nearbyHospitals.find(h => h.id === selectedId);
+
+            if (selectedHospital) {
+                displayHospitalInfo(selectedHospital);
+                hospitalInfo.classList.add('active');
+            }
+        }
+
+        function displayHospitalInfo(hospital) {
+            document.getElementById('hospitalName').textContent = hospital.name;
+            //document.getElementById('hospitalDistance').textContent = hospital.distance + ' away';
+            //document.getElementById('hospitalPhone').textContent = hospital.phone;
+            document.getElementById('hospitalRating').textContent = hospital.rating;
+            document.getElementById('hospitalHours').textContent = hospital.address || 'Address not available';
+        }
+
+
+        function showDirections() {
+            if (!selectedHospital || !currentLocation) return;
+
+            /* 1️⃣ clear previous placeholder inside #map */
+            const mapEl = document.getElementById('map');   // your permanent container
+            mapEl.innerHTML = '';                           // remove old placeholder
+
+            /* 2️⃣ (re)create the Leaflet map inside #map */
+            initRouteMap();
+
+            /* 3️⃣ scroll into view on mobile */
+            if (window.innerWidth <= 768) {
+                mapEl.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        /* global map element id = map */
+        let routeMap = null;           // reuse between clicks
+        let srcMarker = null, dstMarker = null, routeLine = null;
+
+        function initRouteMap() {
+            const mapEl = document.getElementById('map');
+            const icon = document.getElementById('map-icon');
+            if (icon) icon.style.display = 'none';
+
+            if (routeMap) {
+                routeMap.remove();                // destroy instance
+                routeMap = null;
+                if (mapEl._leaflet_id) {
+                    delete mapEl._leaflet_id;     // important: unbind DOM element
+                }
+            }
+
+
+            routeMap = L.map(mapEl);   // first time
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(routeMap);
+
+            /* add blue origin marker */
+            srcMarker = L.marker([currentLocation.lat, currentLocation.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(routeMap)
+                .bindPopup('You are here')
+                .openPopup();
+
+            /* add red destination marker */
+            dstMarker = L.marker([selectedHospital.lat, selectedHospital.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(routeMap)
+                .bindPopup(selectedHospital.name);
+
+            /* add straight-line poly-line */
+            routeLine = L.polyline(
+                [
+                    [currentLocation.lat, currentLocation.lng],
+                    [selectedHospital.lat, selectedHospital.lng]
+                ],
+                { color: 'purple', weight: 4, opacity: 0.6 }
+            ).addTo(routeMap);
+
+            /* fit the map to show both points comfortably */
+            routeMap.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+            /* safeguard: fix layout if map DIV was hidden when created */
+            setTimeout(() => routeMap.invalidateSize(), 100);
+        }
+    document.addEventListener('DOMContentLoaded', function () {
+            const carousel = document.getElementById('carouselContainer');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            let animationPaused = false;
+
+            // Mouse drag functionality
+            carousel.addEventListener('mousedown', (e) => {
+                isDown = true;
+                carousel.style.cursor = 'grabbing';
+                startX = e.pageX - carousel.offsetLeft;
+                scrollLeft = carousel.style.transform.match(/-?[\d.]+/);
+                scrollLeft = scrollLeft ? parseFloat(scrollLeft[0]) : 0;
+
+                // Pause animation
+                carousel.style.animationPlayState = 'paused';
+                animationPaused = true;
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+            });
+
+            carousel.addEventListener('mouseup', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+
+                // Resume animation after a delay
+                setTimeout(() => {
+                    if (animationPaused) {
+                        carousel.style.animationPlayState = 'running';
+                        animationPaused = false;
+                    }
+                }, 2000);
+            });
+
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2;
+                const newTransform = scrollLeft + walk;
+
+                // Limit the drag range to prevent breaking the infinite effect
+                const maxScroll = -400 * 6; // 6 cards width
+                const minScroll = 0;
+
+                if (newTransform >= minScroll) {
+                    carousel.style.transform = `translateX(${minScroll}px)`;
+                } else if (newTransform <= maxScroll) {
+                    carousel.style.transform = `translateX(${maxScroll}px)`;
+                } else {
+                    carousel.style.transform = `translateX(${newTransform}px)`;
+                }
+            });
+
+            // Touch events for mobile
+            carousel.addEventListener('touchstart', (e) => {
+                isDown = true;
+                startX = e.touches[0].pageX - carousel.offsetLeft;
+                scrollLeft = carousel.style.transform.match(/-?[\d.]+/);
+                scrollLeft = scrollLeft ? parseFloat(scrollLeft[0]) : 0;
+                carousel.style.animationPlayState = 'paused';
+                animationPaused = true;
+            });
+
+            carousel.addEventListener('touchmove', (e) => {
+                if (!isDown) return;
+                const x = e.touches[0].pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                const newTransform = scrollLeft + walk;
+
+                const maxScroll = -400 * 6;
+                const minScroll = 0;
+
+                if (newTransform >= minScroll) {
+                    carousel.style.transform = `translateX(${minScroll}px)`;
+                } else if (newTransform <= maxScroll) {
+                    carousel.style.transform = `translateX(${maxScroll}px)`;
+                } else {
+                    carousel.style.transform = `translateX(${newTransform}px)`;
+                }
+            });
+
+            carousel.addEventListener('touchend', () => {
+                isDown = false;
+                setTimeout(() => {
+                    if (animationPaused) {
+                        carousel.style.animationPlayState = 'running';
+                        animationPaused = false;
+                    }
+                }, 2000);
+            });
+        });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateReportBtn');
+    const downloadBtn = document.getElementById('downloadReportBtn');
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    
+    const initialState = document.getElementById('reportInitialState');
+    const loadingState = document.getElementById('reportLoadingState');
+    const displayState = document.getElementById('reportDisplayState');
+    
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    // Sample PDF data (replace with your actual PDF)
+    let currentPdfUrl = null;
+
+    generateBtn.addEventListener('click', function() {
+        startReportGeneration();
+    });
+
+
+    downloadBtn.addEventListener('click', function() {
+        if (currentPdfUrl) {
+            downloadPDF();
+        }
+    });
+
+    async function startReportGeneration() {
+        // Hide initial state and show loading
+        initialState.style.display = 'none';
+        loadingState.style.display = 'block';
+        
+        // Simulate progress
+        await simulateProgress();
+        fetch("/reportgen")
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                currentPdfUrl = data.report_path;  // Use the path returned by Flask
+                console.log(currentPdfUrl)
+                // Complete progress bar
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+
+                showReportDisplay();
+            } else {
+                alert("Report generation failed: " + data.message);
+                resetToInitialState();
+            }
+        })
+        .catch(error => {
+            alert("Server error");
+            console.error(error);
+            resetToInitialState();
+        });
+
+    }
+
+    function simulateProgress() {
+        let progress = 0;
+        let duration = 30 * 1000; // 30 seconds in milliseconds
+        let intervalMs = 200;
+        let step = 100 / (duration / intervalMs); // step = 0.666...
+
+        const interval = setInterval(() => {
+            progress += step;
+
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+            }
+
+            progressFill.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, intervalMs);
+    }
+
+    function showReportDisplay() {
+        setTimeout(() => {
+            loadingState.style.display = 'none';
+            displayState.style.display = 'block';
+
+            // Delay slightly before trying to load PDF
+            setTimeout(() => {
+                displayPDFPages();
+            }, 500);
+        }, 500);
+    }
+
+    function displayPDFPages(retries = 10, delay = 1000) {
+        const page1 = document.getElementById('pdfPage1');
+        const page2 = document.getElementById('pdfPage2');
+
+        function tryLoadPDF(attempt) {
+            pdfjsLib.getDocument(currentPdfUrl).promise.then(pdf => {
+                // Render page 1
+                pdf.getPage(1).then(page => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    const viewport = page.getViewport({ scale: 1.5 });
+
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    page1.innerHTML = '';
+                    page1.appendChild(canvas);
+
+                    page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    });
+                });
+
+                // Render page 2 (optional — remove if your PDFs only have 1 page)
+                pdf.getPage(2).then(page => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    const viewport = page.getViewport({ scale: 1.5 });
+
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    page2.innerHTML = '';
+                    page2.appendChild(canvas);
+
+                    page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    });
+                });
+            }).catch(err => {
+                if (attempt < retries) {
+                    console.log(`PDF not ready yet, retrying (${attempt + 1}/${retries})...`);
+                    setTimeout(() => tryLoadPDF(attempt + 1), delay);
+                } else {
+                    alert("Failed to load PDF after several attempts.");
+                    resetToInitialState();
+                }
+            });
+        }
+
+        tryLoadPDF(0);
+    }
+
+    function downloadPDF() {
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = currentPdfUrl || '#';
+        link.download = 'veterinary-report.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function resetToInitialState() {
+        loadingState.style.display = 'none';
+        displayState.style.display = 'none';
+        initialState.style.display = 'block';
+        
+        // Reset progress
+        progressFill.style.width = '0%';
+        progressText.textContent = '0%';
+        
+        currentPdfUrl = null;
+    }
+});
+        
+    </script>
+</body>
+
+</html>
