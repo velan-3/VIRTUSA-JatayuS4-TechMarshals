@@ -1,29 +1,3 @@
-# # temp_tracker.py
-# TEMP_DIRS = []
-
-# def register_temp_dir(temp_dir,obj_to_cleanup=None):
-#     if temp_dir not in TEMP_DIRS:
-#         TEMP_DIRS.append(temp_dir)
-#     if obj_to_cleanup:
-#         TEMP_DIRS.append(obj_to_cleanup)
-
-# def cleanup_temp_dirs():
-#     import shutil
-#     # import gc
-#     print(TEMP_DIRS)
-#     for obj in TEMP_DIRS:
-#         try:
-#             print("[temptrack] Releasing Chroma object...")
-#             obj = None
-#         except Exception as e:
-#             print(f"[temptrack] Error releasing Chroma object: {e}")
-#     # gc.collect()
-    
-#     for temp_dir in TEMP_DIRS:
-#         try:
-#             shutil.rmtree(temp_dir, ignore_errors=False)
-#         except Exception as e:
-#             print(f"[Cleanup Error] {temp_dir}: {e}")
 import os
 import shutil
 import time
