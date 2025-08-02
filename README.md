@@ -78,7 +78,7 @@ Installer packaging files:
 | `imagetest.py`| Script to test models on local images                                       |
 | `temptrack.py`| Track and store the decryption model directory for deletion                 |
 | `sqlite.py`   | Lightweight database manager using SQLite                                   |
-| `setup.py`    | cx_Freeze/Nuitka build script for packaging                                 |
+| `setup.py`    | cx_Freeze build script for packaging                                        |
 | `reportgen.py`| Report generation using Langgraph                                           |
 
 ## 🧠 AI Models & Capabilities
