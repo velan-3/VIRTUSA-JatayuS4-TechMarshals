@@ -15,7 +15,7 @@ from temptrack import register_temp_dir
 
 
 # Set this securely in code or use environment variables
-FERNET_KEY = b'oa5gUlGQ1SLRFHrpiYXkjajwYJddETxli4qXjrCjGnQ='  # 32-byte base64-encoded key
+FERNET_KEY = b''  # 32-byte base64-encoded key
 
 fernet = Fernet(FERNET_KEY)
 
