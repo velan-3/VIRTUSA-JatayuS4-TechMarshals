@@ -14,11 +14,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def resource_path(relative_path):
-        # try:
-        #     base_path = sys._MEIPASS  # Cx_freeze
-        # except AttributeError:
-        #     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
-        # return os.path.join(base_path, relative_path)
+
         return os.path.abspath(relative_path)
 
 class Model:
@@ -52,11 +48,7 @@ class Model:
     def preprocesspdf(self):
         embeddings = HuggingFaceEmbeddings(model_name=resource_path('huggingface/hub/models--sentence-transformers--all-mpnet-base-v2/snapshots/12e86a3c702fc3c50205a8db88f0ec7c0b6b94a0'))
         print('embedding done')
-        # persist_directory = resource_path('Rag_Model/database_2')
-        # print(self.temp_dir)
         vectordb = Chroma(persist_directory=os.path.join(self.temp_dir, 'database_2'), embedding_function=embeddings)
-        # register_temp_dir(self.database_path, vectordb) 
-        # vectordb = Chroma(persist_directory=os.path.join(persist_directory), embedding_function=embeddings)
         print("db loaded")
         llm = ChatMistralAI(model="mistral-small-2506", temperature=0.3, max_tokens=1000)
         prompt = ChatPromptTemplate.from_template("""
@@ -67,7 +59,6 @@ class Model:
         retriever = vectordb.as_retriever()
         self.retreival_chain = create_retrieval_chain(retriever, chain)
         print("chain initialized")
-        # register_temp_dir(self.database_path, vectordb) 
         return 'PDF process successful'
 
     def run_retrieval(self, query, lang):
