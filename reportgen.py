@@ -1,10 +1,3 @@
-"""
-Enhanced demo_mistral_graph.py - FIXED VERSION
-─────────────────────────────────────────────────────────
-A one-turn conversational graph that sends every user message to Mistral-7B-Instruct
-with proper PDF formatting, markdown handling, and performance optimizations.
-"""
-
 from typing import Annotated, List
 from typing_extensions import TypedDict
 import sqlite3, pandas as pd
@@ -44,9 +37,7 @@ class ChatState(TypedDict,total=False):
     text_page: str          # path to page‑2 PDF (LLM text)
     final_pdf: str          # merged two‑page report
 
-# ─────────────────────────────────────────────────────────────────────
-# 2)  Init the LLM
-# ─────────────────────────────────────────────────────────────────────
+
 os.environ['MISTRAL_API_KEY'] = "VFm7zcXPtANeaSNvMeE6JANXx7Tm0bqC"
 
 llm = ChatMistralAI(
