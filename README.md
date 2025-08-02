@@ -1,7 +1,7 @@
 
 # 🐾 Veterinary Assistant
 
-> An AI-powered livestock disease detection and health monitoring system built for the **VIRTUSA JatayuS4 TechMarshals Hackathon**
+> An AI-powered Cattle disease detection and health monitoring system built for the **VIRTUSA JatayuS4 TechMarshals Hackathon**
 
 ## 📋 Overview
 
