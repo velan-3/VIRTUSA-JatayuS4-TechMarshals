@@ -18,11 +18,11 @@ The platform integrates:
 
 - **🔍 AI-Powered Disease Detection**: Detects multiple cattle diseases using YOLOv8 with real-time camera input  
 - **🤖 Conversational AI Assistant (RAG)**: Built using LangChain + ChromaDB for veterinary queries  
-- **🖥️ Offline & Online Modes**: Works fully offline for field usage; integrates cloud sync when online  
+- **🖥️ Offline & Online Deployment**: Works fully offline for field usage; integrates cloud sync based on the user selected Modes  
 - **📊 Grafana Monitoring Dashboard**: Real-time data visualization with local SQLite backend  
-- **📝 Report Generation**: LangGraph-powered intelligent report summaries (Mistral 7B)  
-- **☁️ Google Drive Sync**: Auto-upload critical reports to authenticated Drive folder  
-- **🌍 Location Mapping**: Maps disease occurrence to regions/states with analytics  
+- **📝 Report Generation**: LangGraph-powered intelligent report summaries (Mistral 7B) and Visualization 
+- **☁️ Google Drive Sync**: Auto-upload Disease Detected Images to authenticated Drive folder for future model training  
+- **🌍 Location Mapping**: Get nearby vet clininc Details 
 - **🧠 Multi-Camera Input**: Supports 5–6 simultaneous camera streams from walking lanes  
 - **🔐 Secure & Encrypted**: Credentials and models encrypted using Python Fernet  
 
@@ -138,7 +138,7 @@ Installer packaging files:
 - **Flask** – Web backend and REST API services
 - **SQLite** – Lightweight, embedded database
 - **cryptography.fernet** – Secure encryption of sensitive files
-- **RapidAPI** – For external APIs if any used (e.g., weather/location)
+- **RapidAPI** – For external APIs (Vet Clinic Location)
 - **OpenStreetMap** – Regional visualization and mapping
 
 ### 📦 Packaging & Deployment
