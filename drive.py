@@ -17,7 +17,7 @@ from pathlib import Path
 from cryptography.fernet import Fernet
 
 
-FERNET_KEY = b'oa5gUlGQ1SLRFHrpiYXkjajwYJddETxli4qXjrCjGnQ='  
+FERNET_KEY = b''  
 fernet = Fernet(FERNET_KEY)
 
 def get_data_dir():
