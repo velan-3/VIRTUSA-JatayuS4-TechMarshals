@@ -20,8 +20,8 @@ def resource_path(relative_path):
 class Model:
     
     def __init__(self):
-        os.environ['MISTRAL_API_KEY'] = "VFm7zcXPtANeaSNvMeE6JANXx7Tm0bqC"
-        FERNET_KEY = b'oa5gUlGQ1SLRFHrpiYXkjajwYJddETxli4qXjrCjGnQ='  # 32-byte base64-encoded key
+        os.environ['MISTRAL_API_KEY'] = ""
+        FERNET_KEY = b''  # 32-byte base64-encoded key
 
         fernet = Fernet(FERNET_KEY)
         with open(resource_path("auth/chroma_encrypted.bin"), "rb") as f:
