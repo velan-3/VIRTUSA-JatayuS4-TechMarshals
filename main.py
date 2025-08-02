@@ -27,11 +27,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def resource_path(relative_path):
-    # try:
-    #     base_path = sys._MEIPASS
-    # except AttributeError:
-    #     base_path = os.path.abspath(".")
-    # return os.path.join(base_path, relative_path)
     return os.path.abspath(relative_path)
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = resource_path("platforms")
 
@@ -425,10 +420,6 @@ class VideoProcessingThread(QtCore.QThread):
                         self.disease_detected_updated.emit(False, False)
                 
     
-            # if len(index) >= 3 and isinstance(index[2], (str, int, float)):
-            #     bcs = str(index[2])
-            #     if self.model.b_s > 3:
-            #         self.bcs_updated.emit(bcs)
 
             # Display live frame
             rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
