@@ -1,117 +1,153 @@
+
 # 🐾 Veterinary Assistant
 
-> An AI-powered veterinary diagnostic system built for the VIRTUSA JatayuS4 TechMarshals hackathon
+> An AI-powered livestock disease detection and health monitoring system built for the **VIRTUSA JatayuS4 TechMarshals Hackathon**
 
 ## 📋 Overview
 
-The Veterinary Assistant is an intelligent application that leverages computer vision and machine learning to assist veterinarians in diagnosing animal health conditions. The system combines multiple AI models including YOLOv8 for object detection, image classification for disease prediction, and natural language processing for comprehensive veterinary reports.
+**Veterinary Assistant** is a comprehensive AI-based diagnostic platform designed to assist veterinarians and farm owners in early identification of cattle diseases. Leveraging **computer vision**, **language models**, and **geospatial intelligence**, the system operates both **offline and online**, making it ideal for rural areas with limited internet access.
+
+The platform integrates:
+- **YOLOv8 models** for real-time disease detection  
+- **LangGraph + Mistral (via LangChain)** for veterinary report generation  
+- **ChromaDB RAG** for AI assistance  
+- **Grafana dashboards** for health monitoring and analytics  
+- **PyQt5 GUI** for user-friendly offline desktop control  
 
 ## ✨ Key Features
 
-- **🔍 AI-Powered Disease Detection**: Advanced image analysis using YOLOv8 models for detecting various animal health conditions
-- **🤖 AI Assistant (RAG)**: Intelligent conversational assistant using LangChain and ChromaDB for context-aware veterinary guidance
-- **📊 Interactive Dashboard**: Real-time monitoring and visualization using Grafana
-- **📝 Automated Report Generation**: LLM-based report creation using LangGraph
-- **☁️ Cloud Integration**: Google Drive integration for seamless data management
-- **🌍 Location Mapping**: Geographic tracking and region-based analytics
-- **📱 User-Friendly Interface**: PyQt5-based desktop application with intuitive design
-- **🗄️ Robust Data Management**: SQLite database with comprehensive schema
-- **🔒 Secure Authentication**: Encrypted credential management
+- **🔍 AI-Powered Disease Detection**: Detects multiple cattle diseases using YOLOv8 with real-time camera input  
+- **🤖 Conversational AI Assistant (RAG)**: Built using LangChain + ChromaDB for veterinary queries  
+- **🖥️ Offline & Online Modes**: Works fully offline for field usage; integrates cloud sync when online  
+- **📊 Grafana Monitoring Dashboard**: Real-time data visualization with local SQLite backend  
+- **📝 Report Generation**: LangGraph-powered intelligent report summaries (Mistral 7B)  
+- **☁️ Google Drive Sync**: Auto-upload critical reports to authenticated Drive folder  
+- **🌍 Location Mapping**: Maps disease occurrence to regions/states with analytics  
+- **🧠 Multi-Camera Input**: Supports 5–6 simultaneous camera streams from walking lanes  
+- **🔐 Secure & Encrypted**: Credentials and models encrypted using Python Fernet  
 
 ## 🏗️ Project Architecture
 
-### 📁 Directory Structure
+### 📁 Directory Structure (Key Folders)
 
-#### `/assets/`
-Static visual assets used in GUI and reports including:
-- Animal disease reference images (anthrax, blackleg, lumpskin, mastitis, mouth conditions)
-- UI fonts (DejaVuSans family in multiple weights)
-- Application icons and visual elements
+#### `/asset/`
+Static visual elements used for display and report generation:
+- Disease reference images (e.g., anthrax, blackleg, FMD)
+- Fonts (DejaVuSans family)
+- Visual design assets/icons
 
 #### `/auth/`
-Encrypted credentials and authentication components:
-- `credentials.json.enc` - Encrypted API credentials
-- `token.pickle.enc` - Encrypted authentication tokens
-- `chroma_encrypted.bin` - Encrypted ChromaDB vector database for AI assistance
-- `disease_prediction_model.pkl.enc` - Encrypted ML model for disease prediction
+All sensitive, encrypted files:
+- `credentials.json.enc` — OAuth credentials
+- `token.pickle.enc` — Auth token for Google Drive
+- `chroma_encrypted.bin` — Chroma vector store
+- `index.enc` — Embedding index
+- `disease_prediction_model.pkl.enc` — ML classification model
 
 #### `/backend/yolomodels/`
 Encrypted YOLOv8 detection models:
-- `bcs.pt.enc` - Body Condition Scoring model
-- `lumpy.pt.enc` - Lumpy Skin Disease detection model
-- `mouth.pt.enc` - Oral/mouth health assessment model
+- `bcs.pt.enc` — Body Condition Score
+- `lumpy.pt.enc` — Lumpy Skin Disease
+- `mouth.pt.enc` — Oral/mouth/FMD detection
 
 #### `/huggingface/`
-RAG (Retrieval-Augmented Generation) components:
-- `config.json` - Model configuration settings
-- `tokenizer.json` - Text tokenization configuration
-- `vocab.json` - Vocabulary mappings
-- `special_tokens_map.json` - Special token definitions
+Embedding + tokenizer files for RAG:
+- `config.json`, `tokenizer.json`, `vocab.json`, `special_tokens_map.json`
 
 #### `/grafana/`
-Offline Grafana server and visualization setup:
-- `bin/grafana-server.exe` - Standalone Grafana server executable
-- `conf/dashboards/virtusa_final.json` - Custom dashboard configuration
-- `conf/datasource/sqlite_datasource.json` - Database connection settings
-- `conf/plugins/` - Additional Grafana plugins
-- `data/logs/` - Application and system logs
-
-### 🐍 Core Python Modules
-
-- **`app.py`** - Flask web server providing REST APIs for the dashboard and external integrations
-- **`llmodel.py`** - LangGraph-powered report generation system with LangChain integration for intelligent veterinary reports and AI assistance
-- **`drive.py`** - Google Drive integration module for cloud storage and file synchronization
-- **`location.py`** - Geographic mapping and region-based analytics for disease tracking
-- **`imagetest.py`** - Standalone testing script for AI model validation and performance testing
-- **`model2.py`** - Secondary AI model integration for enhanced detection capabilities
-- **`temptrack.py`** - Temperature monitoring and logging system (optional environmental tracking)
-- **`sqlite.py`** - Database management system with custom schema for veterinary data
-- **`setup.py`** - Application packaging and distribution script
-- **`main.py`** - Primary PyQt5 desktop application interface and controller
-
-### 🛠️ Additional Components
+Offline-ready Grafana dashboard:
+- `bin/` — Grafana server executable
+- `conf/` — Contains dashboard JSON, SQLite datasource, plugins
+- `data/` and `logs/` — Auto-generated at runtime
 
 #### `/inno_setup/`
-Windows installer builder:
-- `VeterinaryAssistantInstaller.iss` - Inno Setup script for creating Windows installer
-- `icon.ico` - Application icon for installer
+Installer packaging files:
+- `VeterinaryAssistantInstaller.iss` — Inno Setup script
+- `icon.ico` — App icon
 
-## 🤖 AI Models & Capabilities
+## 🐍 Core Python Modules
 
-### Computer Vision Models
-- **Body Condition Scoring (BCS)**: Automated assessment of animal body condition using visual analysis
-- **Lumpy Skin Disease Detection**: Specialized model for identifying lumpy skin disease in livestock
-- **Oral Health Assessment**: Mouth condition analysis for comprehensive health evaluation
+| Module        | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `main.py`     | **Main GUI launcher** (PyQt5 + camera feed + real-time detection)          |
+| `app.py`      | Flask backend for web dashboard, Grafana bridge, and LLM API                |
+| `llmodel.py`  | LLM pipeline using LangGraph + LangChain + Mistral                          |
+| `drive.py`    | Google Drive integration and sync                                           |
+| `location.py` | Region/state-based disease tracking                                         |
+| `model2.py`   | YOLOv8 model runner and detection helper (used by GUI)                      |
+| `imagetest.py`| Script to test models on local images                                       |
+| `temptrack.py`| Temperature data logger (optional sensor input)                             |
+| `sqlite.py`   | Lightweight database manager using SQLite                                   |
+| `setup.py`    | cx_Freeze/Nuitka build script for packaging                                 |
 
-### AI Assistance
-- **Report Generation**: Automated veterinary report creation using LangGraph workflow orchestration
-- **AI Assistant**: LangChain-powered conversational AI with ChromaDB vector storage for context-aware responses
-- **Data Analysis**: Intelligent interpretation of diagnostic results and historical data patterns
+## 🧠 AI Models & Capabilities
 
-### Data Processing & Detection
-- **Image-Based Disease Detection**: Computer vision pipeline for analyzing animal images and identifying health conditions
-- **Multi-Disease Classification**: Simultaneous detection of multiple conditions from single image inputs
-- **Historical Trend Analysis**: Pattern recognition in animal health data over time
+### Computer Vision (YOLOv8)
+- **BCS (Body Condition Scoring)**: Visual estimation of cattle condition
+- **Lumpy Skin Disease**: Accurate lesion detection and pattern match
+- **Oral Disease/FMD**: Lesion detection in the mouth and muzzle
+
+### AI Assistance (NLP + LangGraph)
+- **Report Generation**: Summary reports of detections and health risks
+- **RAG Assistant**: Domain-specific conversational support using LangChain + Chroma
+- **Multi-Camera Support**: Simultaneous processing of 5–6 video feeds from farm walking lanes
+
+### Offline Support
+- Entire solution (GUI, inference, logging, dashboard) works **without internet**
+- All logs and reports are locally stored and synced when online
 
 ## 📊 System Components
 
-### Database Management
-- **SQLite Integration**: Lightweight, embedded database for storing diagnostic results
-- **Data Schema**: Comprehensive structure for veterinary data including diagnostic results
+### 🗃️ Database
+- **SQLite**: Offline-native database for storing all detections
+- **Used in**: Grafana panels, local logs, historical tracking
 
-### Visualization & Monitoring
-- **Grafana Dashboards**: Real-time visualization of disease detection statistics and cattle health trends using data from SQLite database
-- **Disease Distribution Charts**: Visual representation of detected diseases across different cattle populations
-- **Alert Systems**: Automated notifications for critical health conditions or unusual disease patterns
+### 📈 Visualization
+- **Grafana**: Live dashboard showing disease spread and detection count
+- **Dashboards**: Bar, stat, table, and gauge panels for different models
+- **SQLite plugin**: Enables Grafana to read from local `.db` file
 
-### Security & Authentication
-- **Encrypted Storage**: All sensitive data including models, credentials, and patient information is encrypted at rest
-- **Secure API Access**: Token-based authentication for web services and cloud integrations
+### 🔐 Security
+- **Fernet encryption** used to secure:
+  - Google credentials
+  - AI model files
+  - Vector store and indexes
 
-## 🌟 Team: TechMarshals
+## 💻 Technologies Used
 
-This project represents an innovative AI solution for veterinary healthcare, developed as part of the VIRTUSA JatayuS4 hackathon. The system demonstrates advanced integration of computer vision, natural language processing, and cloud technologies to create a comprehensive diagnostic platform for veterinary professionals.
+### 🧠 Computer Vision & Machine Learning
+- **YOLOv8** – Real-time object detection (Ultralytics)
+- **OpenCV** – Image preprocessing and camera integration
+- **Random Forest Classifier** – Backup ML model for classification
+- **NumPy**, **Pillow** – Array/image processing tools
+
+### 🤖 RAG & Language Models
+- **Mistral 7B** – LLM for veterinary report generation (via Hugging Face)
+- **LangChain** – Prompt flows and LLM orchestration
+- **LangGraph** – Agent workflows and report generation
+- **Chroma / ChromaDB** – Vector database for AI assistant
+- **HuggingFace Transformers** – Tokenizer and embedding tools
+- **Deep Translator** – Optional translation support
+
+### 🖥️ User Interface
+- **PyQt5** – Desktop GUI for local/offline mode
+- **HTML / CSS / JS** – Used in Grafana dashboards and Flask routes
+
+### 🛠️ Backend & APIs
+- **Flask** – Web backend and REST API services
+- **SQLite** – Lightweight, embedded database
+- **cryptography.fernet** – Secure encryption of sensitive files
+- **RapidAPI** – For external APIs if any used (e.g., weather/location)
+- **OpenStreetMap** – Regional visualization and mapping
+
+### 📦 Packaging & Deployment
+- **cx_Freeze** – EXE builder for Python apps
+- **Inno Setup** – Final installer builder for Windows
+
+## 👥 Team: TechMarshals
+
+Developed for the **Virtusa JatayuS4 Hackathon**, this project addresses a real-world problem with modern AI, making veterinary care accessible and scalable — even in the most remote regions of India.
 
 ---
 
-**Built with cutting-edge AI technology for advancing animal healthcare** 🐾
+**Built to protect our cattle farms, and empower veterinary science through AI** 🐮🚀
