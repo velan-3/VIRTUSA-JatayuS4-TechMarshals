@@ -4,17 +4,11 @@ import sys
 # Increase recursion limit if needed (YOLO models can be deep)
 sys.setrecursionlimit(3000)
 
-# Detecting platform plugin path dynamically
-# venv_dir = os.path.dirname(sys.executable)
-# platforms_path = os.path.join(venv_dir, "Lib", "site-packages", "PyQt5", "Qt5", "plugins", "platforms")
-# .venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll
+
 import torch
 import torchvision
 import os
-# torch_libs = [(os.path.join(os.path.dirname(torch.__file__), item), item) 
-#             for item in os.listdir(os.path.dirname(torch.__file__)) 
-#             if os.path.isfile(os.path.join(os.path.dirname(torch.__file__), item))]
-# Files to include with the build
+
 include_files = [
     ("backend/yolomodels", "backend/yolomodels"),
     ("auth", "auth"),
