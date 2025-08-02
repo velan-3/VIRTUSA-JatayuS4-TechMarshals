@@ -89,10 +89,6 @@ def locate():
             # Create a map centered on the start location
             m = folium.Map(location=start_location, zoom_start=15)
 
-            # Load the custom car icon image
-            # custom_icon = CustomIcon('car_icon.png', icon_size=(32, 32))
-
-            # Create a PolyLine to represent the path the car will take
             path = folium.PolyLine([start_location, end_location], color='red', weight=5, opacity=0.5)
             path.add_to(m)
 
@@ -102,19 +98,7 @@ def locate():
             cm = folium.Marker(location=end_location)
             cm.add_to(m)
 
-            # Define a function to update the car's position
-            # def update_car_position(car_marker, path):
-            #     car_coords = path.locations
-            #     num_coords = len(car_coords)
-
-            #     for i in range(num_coords):
-            #         car_marker.move_to(car_coords[i])
-            #         time.sleep(0.1)  # Adjust the sleep time to control the animation speed
-
-            # # Animate the car
-            # update_car_position(car_marker, path)
-
-            # Display the map in Streamlit
+            
             st.components.v1.html(m._repr_html_(), height=500)
 
         else:
