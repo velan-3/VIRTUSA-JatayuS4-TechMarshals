@@ -9,7 +9,7 @@
 
 The platform integrates:
 - **YOLOv8 models** for real-time disease detection  
-- **LangGraph + Mistral (via LangChain)** for veterinary report generation  
+- **LangGraph + Mistral (via LangChain)** for veterinary report generation and for Rag
 - **ChromaDB RAG** for AI assistance  
 - **Grafana dashboards** for health monitoring and analytics  
 - **PyQt5 GUI** for user-friendly offline desktop control  
@@ -69,16 +69,17 @@ Installer packaging files:
 
 | Module        | Description                                                                 |
 |---------------|-----------------------------------------------------------------------------|
-| `main.py`     | **Main GUI launcher** (PyQt5 + camera feed + real-time detection)          |
+| `main.py`     | **Main GUI launcher** (PyQt5 + camera feed + real-time detection)           |
 | `app.py`      | Flask backend for web dashboard, Grafana bridge, and LLM API                |
-| `llmodel.py`  | LLM pipeline using LangGraph + LangChain + Mistral                          |
+| `llmodel.py`  | LLM pipeline using LangChain + Mistral                                      |
 | `drive.py`    | Google Drive integration and sync                                           |
-| `location.py` | Region/state-based disease tracking                                         |
+| `location.py` | To get the nearby vet clininc details                                       |
 | `model2.py`   | YOLOv8 model runner and detection helper (used by GUI)                      |
 | `imagetest.py`| Script to test models on local images                                       |
-| `temptrack.py`| Temperature data logger (optional sensor input)                             |
+| `temptrack.py`| Track and store the decryption model directory for deletion                 |
 | `sqlite.py`   | Lightweight database manager using SQLite                                   |
 | `setup.py`    | cx_Freeze/Nuitka build script for packaging                                 |
+| `reportgen.py`| Report generation using Langgraph                                           |
 
 ## 🧠 AI Models & Capabilities
 
@@ -110,7 +111,7 @@ Installer packaging files:
 ### 🔐 Security
 - **Fernet encryption** used to secure:
   - Google credentials
-  - AI model files
+  - AI model files, Frontend file
   - Vector store and indexes
 
 ## 💻 Technologies Used
@@ -124,7 +125,7 @@ Installer packaging files:
 ### 🤖 RAG & Language Models
 - **Mistral 7B** – LLM for veterinary report generation (via Hugging Face)
 - **LangChain** – Prompt flows and LLM orchestration
-- **LangGraph** – Agent workflows and report generation
+- **LangGraph** – Report generation
 - **Chroma / ChromaDB** – Vector database for AI assistant
 - **HuggingFace Transformers** – Tokenizer and embedding tools
 - **Deep Translator** – Optional translation support
