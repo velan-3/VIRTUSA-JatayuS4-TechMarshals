@@ -5,7 +5,7 @@
 
 ## 📋 Overview
 
-**Veterinary Assistant** is a comprehensive AI-based diagnostic platform designed to assist veterinarians and farm owners in early identification of cattle diseases. Leveraging **computer vision**, **language models**, and **geospatial intelligence**, the system operates both **offline and online**, making it ideal for rural areas with limited internet access.
+**Veterinary Assistant** is a comprehensive AI-based diagnostic platform designed to assist veterinarians and farm owners in early identification of cattle diseases. Leveraging **computer vision** and **language models**, the system operates both **offline and online**, making it ideal for rural areas with limited internet access.
 
 The platform integrates:
 - **YOLOv8 models** for real-time disease detection  
