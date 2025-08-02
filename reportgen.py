@@ -38,7 +38,7 @@ class ChatState(TypedDict,total=False):
     final_pdf: str          # merged two‑page report
 
 
-os.environ['MISTRAL_API_KEY'] = "VFm7zcXPtANeaSNvMeE6JANXx7Tm0bqC"
+os.environ['MISTRAL_API_KEY'] = ""
 
 llm = ChatMistralAI(
     model="mistral-small-2506",
