@@ -1,9 +1,9 @@
 
-# 🐾 Veterinary Assistant
+#  Veterinary Assistant
 
 > An AI-powered Cattle disease detection and health monitoring system built for the **VIRTUSA JatayuS4 TechMarshals Hackathon**
 
-## 📋 Overview
+##  Overview
 
 **Veterinary Assistant** is a comprehensive AI-based diagnostic platform designed to assist veterinarians and farm owners in early identification of cattle diseases. Leveraging **computer vision** and **language models**, the system operates both **offline and online**, making it ideal for rural areas with limited internet access.
 
@@ -14,21 +14,21 @@ The platform integrates:
 - **Grafana dashboards** for health monitoring and analytics  
 - **PyQt5 GUI** for user-friendly offline desktop control  
 
-## ✨ Key Features
+##  Key Features
 
-- **🔍 AI-Powered Disease Detection**: Detects multiple cattle diseases using YOLOv8 with real-time camera input  
-- **🤖 Conversational AI Assistant (RAG)**: Built using LangChain + ChromaDB for veterinary queries  
-- **🖥️ Offline & Online Deployment**: Works fully offline for field usage; integrates cloud sync based on the user selected Modes  
-- **📊 Grafana Monitoring Dashboard**: Real-time data visualization with local SQLite backend  
-- **📝 Report Generation**: LangGraph-powered intelligent report summaries (Mistral 7B) and Visualization 
-- **☁️ Google Drive Sync**: Auto-upload Disease Detected Images to authenticated Drive folder for future model training  
-- **🌍 Location Mapping**: Get nearby vet clininc Details 
-- **🧠 Multi-Camera Input**: Supports 5–6 simultaneous camera streams from walking lanes  
-- **🔐 Secure & Encrypted**: Credentials and models encrypted using Python Fernet  
+- ** AI-Powered Disease Detection**: Detects multiple cattle diseases using YOLOv8 with real-time camera input  
+- ** Conversational AI Assistant (RAG)**: Built using LangChain + ChromaDB for veterinary queries  
+- ** Offline & Online Deployment**: Works fully offline for field usage; integrates cloud sync based on the user selected Modes  
+- ** Grafana Monitoring Dashboard**: Real-time data visualization with local SQLite backend  
+- ** Report Generation**: LangGraph-powered intelligent report summaries (Mistral 7B) and Visualization 
+- ** Google Drive Sync**: Auto-upload Disease Detected Images to authenticated Drive folder for future model training  
+- ** Location Mapping**: Get nearby vet clininc Details 
+- ** Multi-Camera Input**: Supports 5–6 simultaneous camera streams from walking lanes  
+- ** Secure & Encrypted**: Credentials and models encrypted using Python Fernet  
 
-## 🏗️ Project Architecture
+##  Project Architecture
 
-### 📁 Directory Structure (Key Folders)
+###  Directory Structure (Key Folders)
 
 #### `/asset/`
 Static visual elements used for display and report generation:
@@ -65,7 +65,7 @@ Installer packaging files:
 - `VeterinaryAssistantInstaller.iss` — Inno Setup script
 - `icon.ico` — App icon
 
-## 🐍 Core Python Modules
+##  Core Python Modules
 
 | Module        | Description                                                                 |
 |---------------|-----------------------------------------------------------------------------|
@@ -81,7 +81,7 @@ Installer packaging files:
 | `setup.py`    | cx_Freeze build script for packaging                                        |
 | `reportgen.py`| Report generation using Langgraph                                           |
 
-## 🧠 AI Models & Capabilities
+##  AI Models & Capabilities
 
 ### Computer Vision (YOLOv8)
 - **BCS (Body Condition Scoring)**: Visual estimation of cattle condition
@@ -97,32 +97,32 @@ Installer packaging files:
 - Entire solution (GUI, inference, logging, dashboard) works **without internet**
 - All logs and reports are locally stored and synced when online
 
-## 📊 System Components
+##  System Components
 
-### 🗃️ Database
+###  Database
 - **SQLite**: Offline-native database for storing all detections
 - **Used in**: Grafana panels, local logs, historical tracking
 
-### 📈 Visualization
+###  Visualization
 - **Grafana**: Live dashboard showing disease spread and detection count
 - **Dashboards**: Bar, stat, table, and gauge panels for different models
 - **SQLite plugin**: Enables Grafana to read from local `.db` file
 
-### 🔐 Security
+###  Security
 - **Fernet encryption** used to secure:
   - Google credentials
   - AI model files, Frontend file
   - Vector store and indexes
 
-## 💻 Technologies Used
+##  Technologies Used
 
-### 🧠 Computer Vision & Machine Learning
+###  Computer Vision & Machine Learning
 - **YOLOv8** – Real-time object detection (Ultralytics)
 - **OpenCV** – Image preprocessing and camera integration
 - **Random Forest Classifier** – Backup ML model for classification
 - **NumPy**, **Pillow** – Array/image processing tools
 
-### 🤖 RAG & Language Models
+###  RAG & Language Models
 - **Mistral 7B** – LLM for veterinary report generation (via Hugging Face)
 - **LangChain** – Prompt flows and LLM orchestration
 - **LangGraph** – Report generation
@@ -130,25 +130,25 @@ Installer packaging files:
 - **HuggingFace Transformers** – Tokenizer and embedding tools
 - **Deep Translator** – Optional translation support
 
-### 🖥️ User Interface
+###  User Interface
 - **PyQt5** – Desktop GUI for local/offline mode
 - **HTML / CSS / JS** – Used in Grafana dashboards and Flask routes
 
-### 🛠️ Backend & APIs
+###  Backend & APIs
 - **Flask** – Web backend and REST API services
 - **SQLite** – Lightweight, embedded database
 - **cryptography.fernet** – Secure encryption of sensitive files
 - **RapidAPI** – For external APIs (Vet Clinic Location)
 - **OpenStreetMap** – Regional visualization and mapping
 
-### 📦 Packaging & Deployment
+###  Packaging & Deployment
 - **cx_Freeze** – EXE builder for Python apps
 - **Inno Setup** – Final installer builder for Windows
 
-## 👥 Team: TechMarshals
+##  Team: TechMarshals
 
 Developed for the **Virtusa JatayuS4 Hackathon**, this project addresses a real-world problem with modern AI, making veterinary care accessible and scalable — even in the most remote regions of India.
 
 ---
 
-**Built to protect our cattle farms, and empower veterinary science through AI** 🐮🚀
+**Built to protect our cattle farms, and empower veterinary science through AI** 
