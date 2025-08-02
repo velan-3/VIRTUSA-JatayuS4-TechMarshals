@@ -20,10 +20,6 @@ FERNET_KEY = b'oa5gUlGQ1SLRFHrpiYXkjajwYJddETxli4qXjrCjGnQ='  # 32-byte base64-e
 fernet = Fernet(FERNET_KEY)
 
 def decrypt_file_to_bytesio(enc_path):
-    # with open(resource_path(enc_path), 'rb') as f:
-    #     encrypted = f.read()
-    # decrypted = cipher.decrypt(encrypted)
-    # return io.BytesIO(decrypted)
     with open(enc_path, 'rb') as f:
         encrypted_data = f.read()
 
@@ -40,11 +36,7 @@ def decrypt_file_to_bytesio(enc_path):
     return temp_file.name  
 
 def resource_path(relative_path):
-        # try:
-        #     base_path = sys._MEIPASS  # Cx_freeze
-        # except AttributeError:
-        #     base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
-        # return os.path.join(base_path, relative_path)
+        
         return os.path.abspath(relative_path)
 
 def load_encrypted_model(filepath):
